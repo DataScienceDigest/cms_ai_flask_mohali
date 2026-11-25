@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <title>techcadd CMS Payload Generator</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        h2 {
+            color: #1f2937;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        textarea {
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 8px 0;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        pre {
+            background: #111827;
+            color: #4ade80;
+            padding: 20px;
+            border-radius: 8px;
+            overflow: auto;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .success {
+            background: #ecfdf5;
+            padding: 15px;
+            border: 1px solid #16a34a;
+            border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>techcadd CMS Payload Generator</h1>
+
+    <!-- STEP 1: IMAGE UPLOAD -->
+
+    <div class="section">
+
+        <h2>Step 1: Upload Image</h2>
+
+        <form action="/upload"
+              method="POST"
+              enctype="multipart/form-data">
+
+            <input type="file"
+                   name="image"
+                   accept="image/*"
+                   required>
+
+            <button type="submit">
+                Upload Image
+            </button>
+
+        </form>
+
+        {% if res %}
+
+        <div class="success">
+
+            <h3>Image Uploaded Successfully</h3>
+
+            <p>
+                <strong>Thumbnail ID:</strong>
+                {{ res.thumbnailId1 }}
+            </p>
+
+            <p>
+                <strong>Image URL:</strong>
+                {{ res.url1 }}
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+<!-- Insert this block after your existing image upload form in imagesupload.html.
+     Remove the old manual ChatGPT prompt/copy controls only. -->
+{% if res %}
+<section>
+  <h2>Generate Page Payload with OpenAI</h2>
+  <label for="page-topic">Page title / topic</label>
+  <input id="page-topic" type="text" style="width:100%" placeholder="Enter page title">
+  <label for="page-keywords">Additional keywords (optional)</label>
+  <textarea id="page-keywords" rows="3" style="width:100%"></textarea>
+  <button type="button" id="generate-page-btn">Generate JSON Payload</button>
+  <p id="page-generation-status" role="status"></p>
+  <label for="page-payload">Generated JSON payload</label>
+  <textarea id="page-payload" rows="20" style="width:100%"></textarea>
+  <button type="button" id="copy-page-btn">Copy JSON</button>
+  <button type="button" id="publish-page-btn"
+    style="background:#16a34a;
+           color:white;
+           padding:12px 24px;
+           border:none;
+           border-radius:6px;
+           cursor:pointer;">
+    Post to CMS
+</button>
+
+<p id="publish-page-status" role="status"></p>
+
+<pre id="cms-response"
+     style="white-space:pre-wrap;"></pre>
+</section>
+<script>
+document.getElementById("publish-page-btn")
+    .addEventListener("click", async function () {
+
+    const button = this;
+
+    const output = document.getElementById("page-payload");
+
+    const status = document.getElementById("publish-page-status");
+
+    const cmsResponse = document.getElementById("cms-response");
+
+    if (!output.value.trim()) {
+        alert("Please generate the JSON payload first.");
+        return;
+    }
+
+    let payload;
+
+    try {
+        payload = JSON.parse(output.value);
+    } catch (error) {
+        status.innerText = "Invalid JSON payload.";
+        status.style.color = "red";
+        return;
+    }
+
+    if (!confirm("Do you want to post this page to CMS?")) {
+        return;
+    }
+
+    button.disabled = true;
+    button.innerText = "Posting...";
+
+    status.innerText = "Submitting payload to CMS...";
+    status.style.color = "blue";
+
+    cmsResponse.innerText = "";
+
+    try {
+
+        const response = await fetch("/publish-page", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                payload: payload
+            })
+        });
+
+        const result = await response.json();
+
+        cmsResponse.innerText = JSON.stringify(
+            result, null, 2
+        );
+
+        if (response.ok && result.success) {
+
+            status.innerText = "Page posted successfully!";
+            status.style.color = "green";
+
+            button.innerText = "Posted Successfully";
+
+        } else {
+
+            status.innerText = "CMS submission failed.";
+            status.style.color = "red";
+
+            button.innerText = "Retry Post";
+            button.disabled = false;
+        }
+
+    } catch (error) {
+
+        status.innerText = error.message;
+        status.style.color = "red";
+
+        button.innerText = "Retry Post";
+        button.disabled = false;
+    }
+});
+</script>
+<script>
+(() => {
+  const button = document.getElementById('generate-page-btn');
+  const output = document.getElementById('page-payload');
+  const status = document.getElementById('page-generation-status');
+  button.addEventListener('click', async () => {
+    const title = document.getElementById('page-topic').value.trim();
+    if (!title) { status.textContent = 'Enter the page topic first.'; return; }
+    button.disabled = true;
+    output.value = '';
+    status.textContent = 'Generating and validating payload using OpenAI...';
+    try {
+      const response = await fetch('/generate-page', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({title, keywords: document.getElementById('page-keywords').value})
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'Generation failed.');
+      output.value = JSON.stringify(result.payload, null, 2);
+      output.dispatchEvent(new Event('input', {bubbles: true}));
+      status.textContent = 'Payload ready. Image credentials have been inserted automatically.';
+    } catch (error) {
+      status.textContent = error.message;
+    } finally { button.disabled = false; }
+  });
+  document.getElementById('copy-page-btn').addEventListener('click', async () => {
+    if (!output.value) return;
+    try { await navigator.clipboard.writeText(output.value); status.textContent = 'JSON copied.'; }
+    catch (_) { output.select(); status.textContent = 'Select and copy the JSON manually.'; }
+  });
+})();
+</script>
+{% endif %}
+
+
+    
+
+</body>
+</html>

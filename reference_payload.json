@@ -1,0 +1,762 @@
+{
+  "title": "6 Month Agentic AI Training in Mohali: LangChain, RAG & AI Agents",
+  "slug": "6-month-agentic-ai-training-in-mohali-langchain-rag-ai-agents",
+  "categoryId": "94c3d5ee-6a18-49a7-b370-2db6210ec6a5",
+  "segment": "courses",
+  "tagline": "Build reliable AI agents with LangChain, LangGraph and RAG in a six-month, project-led learning pathway at techcadd Mohali.",
+  "eyebrow": "Agentic AI Development",
+  "badge": "6 Month Program",
+  "h1": "6 Month Agentic AI Training in Mohali: LangChain, RAG & AI Agents",
+  "intro": "Explore a structured six-month Agentic AI roadmap covering Python, LLM APIs, LangChain, vector databases, RAG, LangGraph, safe tool calling, evaluation and deployment through practical assignments.",
+  "ctaPrimary": {
+    "text": "Enquire About the Next Batch",
+    "type": "enquiry",
+    "url": ""
+  },
+  "ctaSecondary": {
+    "text": "Discuss Curriculum & Projects",
+    "type": "contact",
+    "url": ""
+  },
+  "facts": [],
+  "plans": [],
+  "faqIds": [],
+  "reviewIds": [],
+  "relatedIds": [],
+  "syllabusIntro": "Explore a proposed 24-week Agentic AI roadmap in 10 progressive modules. Build foundations, apply retrieval and tool calling, test stateful workflows, and complete a documented capstone. Confirm the current module timetable with techcadd Mohali.",
+  "syllabusNote": "Module timings and project availability are indicative. Verify batch hours, mentor reviews, assessment criteria and certificate requirements before enrolling.",
+  "audience": [
+    {
+      "id": "af01b051-017a-4e18-b950-464d1a3663fb",
+      "title": "B.Tech, BCA and MCA Students",
+      "body": "Students who want to connect programming fundamentals with practical LLM applications, safe APIs and a structured AI project portfolio."
+    },
+    {
+      "id": "fb7bc6c1-679e-4886-9c5a-704fbab555c3",
+      "title": "Graduates and Entry-Level Developers",
+      "body": "Learners who know some Python or JavaScript and want to build complete AI features rather than use chat tools only."
+    },
+    {
+      "id": "706abe7a-2f73-4b4c-98cc-490256ff3867",
+      "title": "Python and Software Developers",
+      "body": "Developers adding retrieval, vector search, tool calling, state management and LLM testing to an existing engineering skill set."
+    },
+    {
+      "id": "3a77fe1a-59f9-4dfb-98cf-7f4b4a3ec21f",
+      "title": "Career Changers into AI",
+      "body": "Motivated learners who can practise coding consistently and want a clear progression from fundamentals to agentic applications."
+    },
+    {
+      "id": "733e68bb-1ae5-43e7-bb5b-de9ff61b68df",
+      "title": "Working Professionals",
+      "body": "Professionals exploring knowledge assistants, workflow automation and responsible AI integration for business use cases."
+    }
+  ],
+  "audienceIntro": "Whether you are moving from college assignments or already writing software, the most useful starting point is the ability to debug and explain a small Python application.",
+  "benefits": [
+    {
+      "id": "7c467e2d-eb64-4b27-8317-037c7463d143",
+      "placement": "what-you-get",
+      "title": "A Structured Six-Month Roadmap",
+      "body": "Work through 10 connected modules so Python, LangChain, RAG, LangGraph and deployment skills develop in a logical sequence."
+    },
+    {
+      "id": "f99147aa-e1ec-4025-878f-73e25a7acd0d",
+      "placement": "what-you-get",
+      "title": "Build and Evaluate RAG Applications",
+      "body": "Use approved documents, vector search and test questions to build assistants with source-linked answers."
+    },
+    {
+      "id": "d4fe4209-e585-400e-82c6-1b132a590b57",
+      "placement": "what-you-get",
+      "title": "Develop Safe Tool-Using Agents",
+      "body": "Practise API tools, input validation, permissions, retries and approval workflows instead of relying on agent demos alone."
+    },
+    {
+      "id": "4a477bc7-2f89-49a0-9831-b897bb95a4a2",
+      "placement": "what-you-get",
+      "title": "Document a Technical Portfolio",
+      "body": "Prepare repositories, architecture notes, evaluation reports and demonstrations for relevant projects."
+    },
+    {
+      "id": "81163f0b-a165-497e-9e8b-56caf92a7365",
+      "placement": "what-you-get",
+      "title": "Connect AI to Software Engineering",
+      "body": "Use FastAPI, GitHub, pytest and Docker to understand how agentic application features are tested and delivered."
+    },
+    {
+      "id": "f0bf8fb6-b80e-4453-ad31-cd4ec2cb6d21",
+      "placement": "what-you-get",
+      "title": "Career Preparation Through Evidence",
+      "body": "Learn to discuss design decisions, trade-offs and failure handling in technical interviews; support availability depends on the batch."
+    }
+  ],
+  "careerRoles": [
+    {
+      "id": "b324c8c0-a6e0-47b4-8cd3-85020784a780",
+      "role": "Junior AI Application Developer",
+      "body": "Creates Python services that integrate language models, validated APIs and user-facing AI features.",
+      "salaryStart": "",
+      "salarySenior": "",
+      "market": "Mohali / Chandigarh / Tricity"
+    },
+    {
+      "id": "ecdfba32-cf30-45a8-9fd5-d933fa8b9762",
+      "role": "LLM Integration Developer",
+      "body": "Connects LLM APIs to application workflows, implements structured outputs and troubleshoots integration failures.",
+      "salaryStart": "",
+      "salarySenior": "",
+      "market": "Mohali / Chandigarh / Tricity"
+    },
+    {
+      "id": "a1cbb65c-53b9-451a-b885-1712e63c0f43",
+      "role": "RAG Application Developer",
+      "body": "Builds document ingestion and retrieval pipelines, tests grounding and manages source metadata.",
+      "salaryStart": "",
+      "salarySenior": "",
+      "market": "Mohali / Chandigarh / Tricity"
+    },
+    {
+      "id": "76240506-b70b-43ff-83b4-33b610ed39e2",
+      "role": "AI Automation Developer",
+      "body": "Develops bounded tool-using workflows with logging, access controls and approval steps.",
+      "salaryStart": "",
+      "salarySenior": "",
+      "market": "Mohali / Chandigarh / Tricity"
+    },
+    {
+      "id": "d360c3ab-37d5-4089-a997-adbb6dcba270",
+      "role": "Python Backend Developer",
+      "body": "Builds and tests reliable APIs and services that support AI-enabled applications.",
+      "salaryStart": "",
+      "salarySenior": "",
+      "market": "Mohali / Chandigarh / Tricity"
+    }
+  ],
+  "projects": [
+    {
+      "id": "88cc11e0-5bb2-49ce-8d24-a85e7b78ab5e",
+      "title": "Evidence-Based Knowledge Assistant",
+      "body": "Create a question-answering application over approved reference documents. Implement document parsing, metadata, embeddings, vector retrieval and source-linked responses. Evaluate whether retrieved passages actually support the answer, including when the correct response is to say that evidence is missing.",
+      "tags": [
+        "Python",
+        "RAG",
+        "LangChain",
+        "Chroma"
+      ],
+      "demoUrl": "",
+      "videoUrl": ""
+    },
+    {
+      "id": "a0a0f27c-4a74-48c8-b76f-f1face490484",
+      "title": "Customer Support Triage Agent",
+      "body": "Build an agent that classifies incoming support messages, queries a read-only knowledge source, drafts a recommended response and routes uncertain cases for human review. Add structured JSON output, failure handling and a small set of simulated support tickets.",
+      "tags": [
+        "LangChain",
+        "FastAPI",
+        "Pydantic",
+        "AI Agents"
+      ],
+      "demoUrl": "",
+      "videoUrl": ""
+    },
+    {
+      "id": "0158c73d-86df-4f92-989c-b566108024a0",
+      "title": "LangGraph Approval Workflow",
+      "body": "Develop a stateful agent with checkpoints, conditional branches and an approval step before a sensitive action. Show how the workflow resumes after an interruption, records decisions and handles rejected requests without executing them.",
+      "tags": [
+        "LangGraph",
+        "Human-in-the-loop",
+        "Python",
+        "Testing"
+      ],
+      "demoUrl": "",
+      "videoUrl": ""
+    },
+    {
+      "id": "2119ab27-460b-4006-8702-94dde6f328d4",
+      "title": "Research and Verification Assistant",
+      "body": "Design a research workflow that collects information from approved sources, organizes evidence and runs a separate verification step. Include source tracking, uncertainty notes and tests for conflicting or incomplete information.",
+      "tags": [
+        "LangGraph",
+        "RAG",
+        "Evaluation",
+        "Python"
+      ],
+      "demoUrl": "",
+      "videoUrl": ""
+    },
+    {
+      "id": "b7c0c5a2-5178-41b3-b31b-7be2e58a3d36",
+      "title": "RAG Retrieval Benchmark",
+      "body": "Compare two retrieval configurations using representative test questions. Track relevance, groundedness, latency and cost, then produce a brief evidence-based recommendation rather than declaring one system universally best.",
+      "tags": [
+        "FAISS",
+        "Qdrant",
+        "LangSmith",
+        "Metrics"
+      ],
+      "demoUrl": "",
+      "videoUrl": ""
+    },
+    {
+      "id": "3c4c290d-4d90-400b-b266-f3a73d85a665",
+      "title": "Production-Style Agentic AI Capstone",
+      "body": "Combine a document index, a bounded tool-calling agent, an approval mechanism and an API or simple web interface. Package the app with Docker, write tests, create a README and deliver an architecture diagram plus a short demonstration.",
+      "tags": [
+        "FastAPI",
+        "Docker",
+        "LangGraph",
+        "GitHub"
+      ],
+      "demoUrl": "",
+      "videoUrl": ""
+    }
+  ],
+  "workflow": [
+    {
+      "id": "9807e919-aed9-4ca1-a133-85f604bb4431",
+      "title": "Understand the Problem",
+      "body": "Identify the intended user task, available data, success criteria and permission boundaries before selecting an AI framework."
+    },
+    {
+      "id": "83b3d92d-7591-45c3-ae98-a7199eed44c3",
+      "title": "Build a Small Working Feature",
+      "body": "Write Python code, integrate one model or tool, validate inputs and keep the workflow easy to debug."
+    },
+    {
+      "id": "d556ca07-c444-435b-a2c5-233e2c7f2ecb",
+      "title": "Add Retrieval and Agent Behavior",
+      "body": "Introduce embeddings, vector search or tool calling only where they improve the use case."
+    },
+    {
+      "id": "8c69d683-4082-485a-8b19-49826703d69c",
+      "title": "Test Safety and Quality",
+      "body": "Evaluate groundedness, tool permissions, error recovery, latency and cost using repeatable scenarios."
+    },
+    {
+      "id": "b99fdc4b-1633-45f6-a564-44473b604a3a",
+      "title": "Deploy and Explain the Result",
+      "body": "Document architecture, package the app and present technical trade-offs with honest limitations."
+    }
+  ],
+  "whyPoints": [
+    {
+      "id": "bb02e54b-910f-4741-b576-b65940d294b3",
+      "title": "Concepts Connected to Working Code",
+      "body": "Move from Python fundamentals into real model, retrieval and API integrations."
+    },
+    {
+      "id": "d3847c5f-6cd7-439d-87aa-ec460223dc64",
+      "title": "Deliberate RAG and Agent Design",
+      "body": "Learn when search, a fixed chain or a tool-using agent is appropriate rather than choosing complexity by default."
+    },
+    {
+      "id": "2fbe94e1-1e0d-4953-a429-c2ead2ed87a0",
+      "title": "Practical Testing Skills",
+      "body": "Use repeatable checks and tracing to identify unsupported answers, retrieval weaknesses and tool failures."
+    },
+    {
+      "id": "aedcf4b5-89c9-43bd-a6f2-e9819a0774da",
+      "title": "Safety and Human Review",
+      "body": "Practise permission boundaries, prompt-injection awareness and approval gates for consequential actions."
+    },
+    {
+      "id": "a68c6c4a-95d8-44c4-ad79-369e012b3e0e",
+      "title": "Clear Six-Month Progression",
+      "body": "Follow a roadmap that builds from smaller assignments to a single integrated capstone."
+    },
+    {
+      "id": "53aa55e1-e4ec-40d4-8537-b566c131bb2f",
+      "title": "Discuss the Actual Batch",
+      "body": "Confirm modules, class mode, fees, certificate terms and available career assistance before joining."
+    }
+  ],
+  "whyIntro": "techcadd Mohali offers an enquiry route for learners seeking practical Agentic AI development. The proposed roadmap prioritizes grounded answers, safe tools, testing and a demonstrable portfolio.",
+  "comparisonRows": [
+    {
+      "id": "cfeefe26-bd2c-4d08-ae77-d22957cc850f",
+      "feature": "Learning goal",
+      "ours": "Build and explain complete agentic AI applications",
+      "theirs": "May focus only on prompting or tool demonstrations"
+    },
+    {
+      "id": "33e6c095-ccd7-4311-b977-58053eb3a9b4",
+      "feature": "Programming foundation",
+      "ours": "Python, APIs, validation and version control",
+      "theirs": "Programming depth depends on course scope"
+    },
+    {
+      "id": "b18c1bba-b6b4-49c6-9cfb-9652be66edad",
+      "feature": "RAG practice",
+      "ours": "Document ingestion, retrieval and evaluation",
+      "theirs": "Some introductions stop at a basic Q&A demo"
+    },
+    {
+      "id": "63d48ec1-122a-4512-83e9-b289da0ec97e",
+      "feature": "Agent workflows",
+      "ours": "Tool limits, LangGraph state and approval gates",
+      "theirs": "May demonstrate agents without explicit review flows"
+    },
+    {
+      "id": "4e3c5316-8a79-4b4c-921d-33ea037c4707",
+      "feature": "Evaluation",
+      "ours": "Repeatable tests, source checks and trace review",
+      "theirs": "Assessment standards vary by program"
+    },
+    {
+      "id": "f6e45e12-2706-4bca-b891-2b3d4435ca2a",
+      "feature": "Deployment",
+      "ours": "FastAPI, Docker and documented demos",
+      "theirs": "Deployment coverage depends on curriculum"
+    },
+    {
+      "id": "fbd5f613-533a-4e52-95f4-d338efad8b5c",
+      "feature": "Portfolio",
+      "ours": "Projects with tests, README and design notes",
+      "theirs": "Deliverables vary across learning formats"
+    }
+  ],
+  "comparisonIntro": "When comparing an Agentic AI course in Mohali, look for technical depth, verified project deliverables and a clear evaluation approach rather than a long list of framework names.",
+  "comparisonOthers": "A short introductory AI workshop",
+  "comparisonNote": "These are criteria for comparing learning formats, not verified claims about a specific competing institute. Confirm the actual batch scope.",
+  "toolItems": [
+    {
+      "id": "c30817c1-c661-4a0b-9da5-6b4b4374ee04",
+      "name": "Python",
+      "category": "Programming language",
+      "url": "https://www.python.org/"
+    },
+    {
+      "id": "e966a868-fbff-4160-bd76-6249136e483a",
+      "name": "Visual Studio Code",
+      "category": "Development editor",
+      "url": "https://code.visualstudio.com/"
+    },
+    {
+      "id": "7a806cf5-a2bb-4fa0-9c6c-bd6951af3468",
+      "name": "Git",
+      "category": "Version control",
+      "url": "https://git-scm.com/"
+    },
+    {
+      "id": "197b440a-b8c8-4086-94f2-755926d0080b",
+      "name": "GitHub",
+      "category": "Code collaboration",
+      "url": "https://github.com/"
+    },
+    {
+      "id": "dfb5d4d2-bdfc-4674-8351-a1d48df74644",
+      "name": "Jupyter Notebook",
+      "category": "Interactive Python notebooks",
+      "url": "https://jupyter.org/"
+    },
+    {
+      "id": "fccd7b6e-c225-4036-a737-1ed4ef4a5adc",
+      "name": "Pydantic",
+      "category": "Data validation",
+      "url": "https://docs.pydantic.dev/"
+    },
+    {
+      "id": "9bbeb1b6-0899-4a8a-81aa-7ef7b4d546bc",
+      "name": "FastAPI",
+      "category": "Python API framework",
+      "url": "https://fastapi.tiangolo.com/"
+    },
+    {
+      "id": "580af0fc-d273-4b36-9a8c-d395c9252b8f",
+      "name": "LangChain",
+      "category": "LLM application framework",
+      "url": "https://docs.langchain.com/"
+    },
+    {
+      "id": "014b0a90-2e69-443f-ae75-5a59454fc2f2",
+      "name": "LangGraph",
+      "category": "Stateful agent orchestration",
+      "url": "https://docs.langchain.com/oss/python/langgraph/overview"
+    },
+    {
+      "id": "493a882f-5bc2-4c30-8026-817e181559b3",
+      "name": "LLM APIs",
+      "category": "Model integration and tool calling",
+      "url": ""
+    },
+    {
+      "id": "18b24f55-60e7-41bf-b402-318a09276ef5",
+      "name": "Hugging Face",
+      "category": "Models and embeddings",
+      "url": "https://huggingface.co/"
+    },
+    {
+      "id": "e8bd0a18-fa17-4646-8391-f18ca9917009",
+      "name": "sentence-transformers",
+      "category": "Text embedding models",
+      "url": "https://sbert.net/"
+    },
+    {
+      "id": "a31ed2f0-400f-43ea-89ac-1d76bea98269",
+      "name": "Chroma",
+      "category": "Vector database",
+      "url": "https://www.trychroma.com/"
+    },
+    {
+      "id": "dd6e0f80-a06e-4b6c-9397-379cd9acbd6a",
+      "name": "FAISS",
+      "category": "Similarity search library",
+      "url": "https://github.com/facebookresearch/faiss"
+    },
+    {
+      "id": "09dd60cd-a6d0-4936-855a-76229d16d705",
+      "name": "Qdrant",
+      "category": "Vector search engine",
+      "url": "https://qdrant.tech/"
+    },
+    {
+      "id": "b147dc20-b26c-4e2d-ac5a-584936a1ec84",
+      "name": "PostgreSQL",
+      "category": "Relational database",
+      "url": "https://www.postgresql.org/"
+    },
+    {
+      "id": "9d524065-6bad-45ad-9e66-8d0f4302a381",
+      "name": "pgvector",
+      "category": "Vector search in PostgreSQL",
+      "url": "https://github.com/pgvector/pgvector"
+    },
+    {
+      "id": "18e5ab81-6a90-4567-bd2f-bd51c7b70bce",
+      "name": "Docker",
+      "category": "Containerized deployment",
+      "url": "https://www.docker.com/"
+    },
+    {
+      "id": "088762f7-01eb-47d2-9e0b-66b1143bcb7d",
+      "name": "pytest",
+      "category": "Automated Python testing",
+      "url": "https://pytest.org/"
+    },
+    {
+      "id": "ddbb1a90-e38b-4a1c-8391-83b106617af4",
+      "name": "LangSmith",
+      "category": "Agent tracing and evaluation",
+      "url": "https://www.langchain.com/langsmith"
+    },
+    {
+      "id": "6a3c1556-be53-418b-ac6f-39c0cd1fd48a",
+      "name": "Streamlit",
+      "category": "Interactive AI app interface",
+      "url": "https://streamlit.io/"
+    }
+  ],
+  "demand": "Teams exploring LLM-enabled software value developers who can connect APIs, ground answers in documents, test failure cases and secure tool permissions. Specific vacancies and salaries change by employer.",
+  "careers": [
+    "Junior AI Application Developer",
+    "LLM Integration Developer",
+    "RAG Application Developer",
+    "AI Automation Developer",
+    "Python Backend Developer"
+  ],
+  "tools": [
+    "Python",
+    "Visual Studio Code",
+    "Git",
+    "GitHub",
+    "Jupyter Notebook",
+    "Pydantic",
+    "FastAPI",
+    "LangChain",
+    "LangGraph",
+    "LLM APIs",
+    "Hugging Face",
+    "sentence-transformers",
+    "Chroma",
+    "FAISS",
+    "Qdrant",
+    "PostgreSQL",
+    "pgvector",
+    "Docker",
+    "pytest",
+    "LangSmith",
+    "Streamlit"
+  ],
+  "salary": "",
+  "shortDescription": "Explore 6 Month Agentic AI Training in Mohali with Python, LangChain, RAG, LangGraph, vector databases, safe AI agents and a practical capstone.",
+  "description": "<h2><strong>Build AI Agents That Do More Than Answer Questions</strong></h2><p>A conventional chatbot gives an answer; a properly designed <strong>AI agent</strong> can also retrieve approved information, choose a permitted tool, evaluate a result and continue toward a goal. The <strong>6 Month Agentic AI Training in Mohali</strong> page at techcadd introduces that end-to-end development process. Learners move from Python and APIs to <strong>LangChain</strong>, <strong>RAG</strong>, <strong>LangGraph</strong> and a deployable capstone. The emphasis is on building explainable systems with boundaries, not claiming that autonomous software is always correct.</p><h2><strong>What Is Agentic AI and How Is It Different from Generative AI?</strong></h2><p><strong>Generative AI</strong> creates text, images or other outputs in response to an input. <strong>Agentic AI</strong> adds application logic that can plan steps, call tools and react to feedback. For example, a model may summarize a support policy, while an agentic application may retrieve the relevant policy, inspect an allowed ticket record and draft the appropriate next action. These systems still rely on model outputs that can be wrong; permissions, testing and human oversight remain important.</p><h2><strong>Why Learn Python and APIs Before Building Agents?</strong></h2><p><strong>Python programming</strong> provides a practical foundation for AI application development. Learners work with functions, packages, virtual environments, JSON, HTTP requests, error handling and Git before combining them with language-model APIs. These skills matter when a document loader fails, a tool returns unexpected data or an integration needs debugging. Starting with software fundamentals makes later <strong>LLM application development</strong> more reliable and allows projects to be tested and maintained.</p><h2><strong>LangChain for LLM Application Development</strong></h2><p><strong>LangChain</strong> helps developers connect language models, prompts, document processing, retrievers and tools into applications. Training activities can include structured outputs, reusable prompt templates, request validation and safe API integrations. Students learn to treat framework components as building blocks rather than magic shortcuts. A simple, inspectable workflow is often better than a complicated agent when the task follows a fixed sequence.</p><h2><strong>RAG Training: Connect Language Models with Relevant Knowledge</strong></h2><p><strong>Retrieval-Augmented Generation (RAG)</strong> supplies a model with selected information retrieved from an approved knowledge base. A typical workflow extracts text, splits documents into chunks, creates embeddings, indexes them in a vector database and retrieves useful passages for a question. Learners practise source attribution and refusal when evidence is missing. RAG improves access to context but does not guarantee factual correctness, making evaluation an essential part of the course.</p><h2><strong>Vector Databases, Embeddings and Search Quality</strong></h2><p>An <strong>embedding</strong> is a numeric representation used to compare similarity between pieces of information. Tools such as <strong>Chroma</strong>, <strong>FAISS</strong>, <strong>Qdrant</strong> and <strong>pgvector</strong> support different retrieval configurations. Learners explore chunk sizes, metadata filters, search results and basic retrieval evaluation. The aim is not to memorize every vendor; it is to understand how retrieval choices affect the relevance of information passed to an LLM.</p><h2><strong>Build AI Agents with Safe Tool Calling</strong></h2><p><strong>AI agents</strong> may call functions, read an approved database or interact with a connected service. This introduces risks that are absent from a simple text response. A suitable training exercise defines tool schemas, limits permissions, logs decisions and handles failed calls. Learners can build a controlled support assistant that drafts recommendations without changing real records automatically. They learn when to use an agent and when a predictable fixed workflow is safer.</p><h2><strong>LangGraph for Stateful and Human-in-the-Loop Workflows</strong></h2><p><strong>LangGraph</strong> is useful when an application needs branching logic, persistent state or a step that pauses for human input. Learners can model an agent workflow as nodes and transitions, add checkpoints and design approval gates before consequential actions. An example is an agent that prepares an operational request but waits for a person to approve it. This turns the concept of responsible automation into a concrete development pattern.</p><h2><strong>Multi-Agent Systems and MCP: When Are They Useful?</strong></h2><p>A <strong>multi-agent system</strong> separates responsibilities, for example research, drafting and verification, while a shared workflow coordinates the results. The <strong>Model Context Protocol (MCP)</strong> is a standard for making tools and context available to AI applications. Learners explore these concepts through bounded prototypes, including the cost and complexity of additional agents. The course avoids treating multiple agents as automatically better than a single well-designed workflow.</p><h2><strong>How Do You Evaluate the Reliability of an AI Agent?</strong></h2><p>A working demo is not sufficient evidence that an agent is ready for a production environment. Tests should cover retrieval quality, unsupported claims, tool permissions, failures, latency and cost. With <strong>pytest</strong> and tracing tools such as <strong>LangSmith</strong>, learners can compare outputs against expected behaviors and inspect failed runs. Good evaluation asks whether the system completed the intended task safely and whether a human can audit what happened.</p><h2><strong>Projects and Portfolio: Show the Code Behind the Demo</strong></h2><p>During the six-month roadmap, students can create a document knowledge assistant, a support triage agent, a human-approved workflow, a research checker and a final integrated application. Each proposed project has a clear purpose, bounded dataset, measurable checks and a deliverable such as a README, demo or test report. A strong <strong>Agentic AI portfolio</strong> makes design decisions visible; screenshots without implementation evidence are less useful in technical interviews.</p><h2><strong>Deployment, GitHub and Career Preparation</strong></h2><p><strong>FastAPI</strong>, <strong>Docker</strong> and <strong>GitHub</strong> help turn isolated experiments into understandable application projects. Students can learn how to expose an endpoint, manage environment variables, write automated tests and document deployment steps. These skills connect Agentic AI with broader software engineering roles such as AI application developer and LLM integration trainee. Employability depends on portfolio quality, programming ability, interview performance and hiring requirements, not course completion alone.</p><h2><strong>Who Can Join Agentic AI Training in Mohali?</strong></h2><p>This pathway is relevant to B.Tech, BCA, MCA and related students, graduates, software developers, career changers and professionals exploring AI automation. Learners familiar with basic programming may progress faster, while beginners may need extra practice with Python, functions and APIs. The <strong>Mohali</strong> location is relevant to learners across the Chandigarh Tricity; exact class mode, batch timings and assessment expectations should be confirmed with techcadd.</p><h2><strong>Why Consider techcadd for a Six-Month AI Learning Pathway?</strong></h2><p>A useful <strong>Agentic AI course in Mohali</strong> should connect concepts to practical code, clearly define project deliverables and include opportunities to review what worked and what did not. This course-page roadmap emphasizes real implementation concerns such as source grounding, human approvals, version control and testing. Ask techcadd Mohali about the current curriculum, project mentoring, available software, certificate requirements and career assistance before enrolling.</p><h2><strong>Start Your Agentic AI Learning Journey in Mohali</strong></h2><p>If you want to build <strong>LangChain applications</strong>, practical <strong>RAG assistants</strong> and controlled <strong>AI agents</strong>, review the six-month module sequence and decide which portfolio projects match your goals. Contact techcadd Mohali to discuss prerequisites, the current batch, fees, learning mode and whether the proposed project schedule is available. Ask for a curriculum walkthrough before committing to a program.</p>",
+  "duration": "6 Months",
+  "level": "advanced",
+  "mode": "",
+  "whyVideoUrl": "",
+  "syllabusVideoUrl": "",
+  "learningVideoUrl": "",
+  "highlightsVideoUrl": "",
+  "caseVideoUrl": "",
+  "certVideoUrl": "",
+  "careerVideoUrl": "",
+  "reviewsVideoUrl": "",
+  "syllabus": [
+    {
+      "id": "2a901a72-98bd-424d-95de-1d665f5a33d0",
+      "title": "Weeks 1–2 | Python and Developer Foundations",
+      "topics": [
+        "Python functions, typing and packages",
+        "Virtual environments, Git and GitHub",
+        "JSON, HTTP requests and REST APIs",
+        "Clean code, logging and error handling"
+      ],
+      "body": "Start by writing maintainable Python scripts, consuming an API and recording changes with Git. A reliable agent begins with reliable software foundations.",
+      "outcomes": [
+        "Build a small Python API client",
+        "Commit a tested repository"
+      ],
+      "tools": [
+        "Python",
+        "Git",
+        "GitHub",
+        "VS Code"
+      ],
+      "project": "API-powered information collector with validation, README and meaningful error handling."
+    },
+    {
+      "id": "df9f63d1-f526-48e8-8c15-b86fb2cff108",
+      "title": "Weeks 3–4 | LLM Concepts, Prompting and Outputs",
+      "topics": [
+        "Tokens, context windows and model constraints",
+        "System prompts and instruction design",
+        "Structured JSON output with Pydantic",
+        "Latency, token cost and model selection"
+      ],
+      "body": "Explore how large language models generate responses, where they fail and how to request schema-constrained outputs that downstream applications can trust.",
+      "outcomes": [
+        "Validate structured LLM responses",
+        "Compare prompt results and costs"
+      ],
+      "tools": [
+        "Python",
+        "Pydantic",
+        "LLM APIs",
+        "Jupyter Notebook"
+      ],
+      "project": "A prompt-and-output evaluation notebook with valid JSON extraction."
+    },
+    {
+      "id": "9f9fd5ba-b5db-4ec8-bc4e-6596308c6ad8",
+      "title": "Weeks 5–6 | LangChain and Application Patterns",
+      "topics": [
+        "Models, messages and prompt templates",
+        "Runnable composition and chains",
+        "Document loaders and text splitters",
+        "Tool schemas and API integration"
+      ],
+      "body": "Connect model calls to reusable application components, keep data boundaries explicit and test each integration before enabling automated actions.",
+      "outcomes": [
+        "Create reusable AI components",
+        "Implement a restricted read-only tool"
+      ],
+      "tools": [
+        "LangChain",
+        "Python",
+        "FastAPI",
+        "Pydantic"
+      ],
+      "project": "A small question-answering API with structured output and a safe tool."
+    },
+    {
+      "id": "e02764e0-2a89-4b95-bc48-4247117b38cd",
+      "title": "Weeks 7–9 | Retrieval-Augmented Generation Foundations",
+      "topics": [
+        "Document ingestion and text extraction",
+        "Chunking, metadata and provenance",
+        "Embeddings and semantic similarity",
+        "Retrieval with source-attributed answers"
+      ],
+      "body": "Learn the complete retrieval-augmented generation workflow: prepare approved content, index it, retrieve relevant passages and answer with traceable citations.",
+      "outcomes": [
+        "Build an end-to-end RAG pipeline",
+        "Expose supporting source references"
+      ],
+      "tools": [
+        "LangChain",
+        "Chroma",
+        "sentence-transformers",
+        "Python"
+      ],
+      "project": "Document Q&A assistant using an approved PDF knowledge base."
+    },
+    {
+      "id": "4e812fae-b7a9-4608-8b1f-19e9ca04657c",
+      "title": "Weeks 10–12 | Vector Search and RAG Evaluation",
+      "topics": [
+        "Chroma, FAISS and Qdrant trade-offs",
+        "Metadata filtering and hybrid search concepts",
+        "Chunk-size, top-k and reranking experiments",
+        "Faithfulness, retrieval quality and test sets"
+      ],
+      "body": "Improve a working RAG assistant with controlled experiments. Measure retrieval relevance and answer grounding rather than assuming that a fluent answer is correct.",
+      "outcomes": [
+        "Compare multiple retrieval approaches",
+        "Record a before-and-after evaluation"
+      ],
+      "tools": [
+        "FAISS",
+        "Qdrant",
+        "LangSmith",
+        "pgvector"
+      ],
+      "project": "RAG quality report with a small evaluation dataset and cited outputs."
+    },
+    {
+      "id": "c65085a6-f4c7-4757-b187-d072e8a10968",
+      "title": "Weeks 13–15 | AI Agents and Tool Calling",
+      "topics": [
+        "Goal-oriented workflows versus fixed chains",
+        "Tool-calling contracts and permissions",
+        "Planning, retries and stop conditions",
+        "Read-only versus write-capable tools"
+      ],
+      "body": "Build a tool-using assistant that selects actions within clear rules. Learn why reliable agents need permission boundaries, timeouts and explicit failure paths.",
+      "outcomes": [
+        "Implement and test an agent loop",
+        "Add guardrails for tool execution"
+      ],
+      "tools": [
+        "LangChain",
+        "Python",
+        "Pydantic",
+        "FastAPI"
+      ],
+      "project": "Service desk assistant that searches approved information and drafts a response."
+    },
+    {
+      "id": "1cdb47b2-8dba-4eaa-9e2d-67a9acc75c79",
+      "title": "Weeks 16–18 | LangGraph and Human Approval",
+      "topics": [
+        "State graphs, nodes, edges and routing",
+        "Checkpointing and conversational state",
+        "Human-in-the-loop approval gates",
+        "Recovery, interrupts and resumable workflows"
+      ],
+      "body": "Use LangGraph to represent multi-step decisions as a stateful workflow. Make sensitive actions pause for approval and resume safely after review.",
+      "outcomes": [
+        "Design a stateful agent graph",
+        "Test approval and interruption states"
+      ],
+      "tools": [
+        "LangGraph",
+        "Python",
+        "LangSmith",
+        "PostgreSQL"
+      ],
+      "project": "Approval-based agent that drafts an action but never executes it without review."
+    },
+    {
+      "id": "1ceb3227-aab0-4587-be72-9e04ff633f12",
+      "title": "Weeks 19–20 | Multi-Agent Systems and Integrations",
+      "topics": [
+        "Supervisor and specialist agent patterns",
+        "Task handoffs and shared state",
+        "MCP concepts and tool interoperability",
+        "Context isolation and integration testing"
+      ],
+      "body": "Compare single-agent and multi-agent architectures. Build a small coordinated workflow only where separate specialist responsibilities actually improve clarity.",
+      "outcomes": [
+        "Coordinate two specialized roles",
+        "Document integration contracts"
+      ],
+      "tools": [
+        "LangGraph",
+        "LangChain",
+        "FastAPI",
+        "GitHub"
+      ],
+      "project": "Research-and-review workflow with evidence gathering and independent checking."
+    },
+    {
+      "id": "abb9ea19-44ea-4715-b1e7-d74a4846f8ee",
+      "title": "Weeks 21–22 | Testing, Safety and Observability",
+      "topics": [
+        "Prompt injection and untrusted documents",
+        "PII handling and least-privilege access",
+        "Unit tests and scenario evaluation",
+        "Tracing, cost tracking and failure analysis"
+      ],
+      "body": "Test the application as software, not only as a chat demo. Include adversarial inputs, retrieval failures, latency checks and safe fallback behavior.",
+      "outcomes": [
+        "Write repeatable AI evaluation cases",
+        "Document safety and privacy controls"
+      ],
+      "tools": [
+        "pytest",
+        "LangSmith",
+        "Pydantic",
+        "GitHub"
+      ],
+      "project": "Agent evaluation suite with tests for citations, permissions and graceful failures."
+    },
+    {
+      "id": "203ccdbf-71fd-4931-b29b-8d6cde80bd2d",
+      "title": "Weeks 23–24 | Deployment and Final Capstone",
+      "topics": [
+        "FastAPI endpoints and environment configuration",
+        "Docker builds and deployment hygiene",
+        "Monitoring, documentation and demo review",
+        "Portfolio presentation and technical interviews"
+      ],
+      "body": "Package your final agentic application behind a documented API, demonstrate its strengths and limitations, and explain the design decisions in a portfolio review.",
+      "outcomes": [
+        "Deploy a demonstrable prototype",
+        "Present architecture, results and limitations"
+      ],
+      "tools": [
+        "FastAPI",
+        "Docker",
+        "GitHub",
+        "Streamlit"
+      ],
+      "project": "Deployed RAG and tool-using assistant with README, tests and a recorded walkthrough."
+    }
+  ],
+  "highlights": [
+    "24-week learning roadmap across 10 modules",
+    "Python, LLM APIs, LangChain and LangGraph",
+    "RAG, vector search and grounded AI responses",
+    "Safe agents, human approvals and testing",
+    "Six portfolio-oriented development projects",
+    "Deployment concepts with FastAPI and Docker"
+  ],
+  "eligibility": "B.Tech, BCA, MCA students, graduates, working professionals and motivated beginners; basic Python helps. Confirm current entry requirements and weekly class hours with techcadd Mohali.",
+  "certification": "Ask techcadd Mohali about completion certificate eligibility, project assessment, attendance rules and any optional external examination requirements.",
+  "overview": "<h2><strong>Six-Month Agentic AI Training in Mohali</strong></h2><p>The <strong>Agentic AI course in Mohali</strong> develops practical skill in <strong>Python</strong>, <strong>LLM APIs</strong>, <strong>LangChain</strong>, <strong>RAG</strong> and <strong>LangGraph</strong>. A six-month roadmap creates room for foundational coding, source-grounded applications, bounded tool use, testing and a final capstone. Learners gain a clearer understanding of how modern AI software is designed, rather than collecting disconnected prompt examples.</p><h2><strong>From Prompt Engineering to Structured LLM Applications</strong></h2><p>A reliable language-model application needs more than a clever prompt. Learners explore prompt templates, token constraints, model limitations, typed JSON outputs and API error handling. The practical objective is to produce predictable data for the next component in a workflow and to understand how an application should respond when the model output is incomplete or inconsistent.</p><h2><strong>Practical Retrieval-Augmented Generation and Vector Search</strong></h2><p><strong>RAG</strong> combines document processing, embeddings, retrieval and answer generation so a system can work with a specified knowledge base. The curriculum examines chunking, metadata and source provenance as well as vector search tools such as <strong>Chroma</strong>, <strong>FAISS</strong> and <strong>Qdrant</strong>. Learners practise evaluating whether retrieved passages support the resulting answer.</p><h2><strong>Build Controlled AI Agents with LangChain</strong></h2><p><strong>LangChain</strong> provides components for integrating models, retrievers and tools. Students can develop agents that call read-only APIs, interpret structured results and draft useful next steps. They also examine tool permission boundaries and stop conditions. The intended skill is knowing how to build and debug a tool-using workflow safely, not assuming that an agent should control every action.</p><h2><strong>LangGraph, State and Human Approval</strong></h2><p><strong>LangGraph</strong> supports stateful orchestration, checkpoints and human-in-the-loop patterns. Learners construct workflows with branches and resume points, then demonstrate that a sensitive request waits for explicit approval. This introduces important production concepts: traceability, recoverability and responsibility for decisions delegated to software.</p><h2><strong>AI Project Portfolio and Technical Evaluation</strong></h2><p>Projects include a knowledge assistant, support triage workflow, retrieval benchmark, research checker and final integrated capstone. Each planned assignment has a defined deliverable, such as tested code, a demonstration, a short evaluation report or deployment documentation. The finished portfolio should explain what the application does, where it can fail and why the chosen design is appropriate.</p><h2><strong>Deployment and Career Skills</strong></h2><p>Students learn how <strong>FastAPI</strong>, <strong>Docker</strong>, <strong>GitHub</strong> and automated tests support AI application delivery. These skills can complement preparation for junior AI engineering and LLM integration positions. The exact curriculum, class hours and available career assistance should be confirmed with techcadd Mohali; training does not guarantee employment.</p><h2><strong>Training Enquiry for Mohali and Chandigarh Learners</strong></h2><p>Students from Mohali, Chandigarh and nearby Tricity areas can use the course outline to compare technical coverage and project expectations. Before admission, ask about the next batch, fees, level prerequisites, mode of instruction, certificate criteria and whether capstone guidance is included. Clear answers help you select a program that aligns with your current skills and goals.</p>",
+  "videoUrl": "",
+  "videoTitle": "",
+  "hiddenSections": [],
+  "sectionOrder": [],
+  "sections": [],
+  "featured": false,
+  "seo": {
+    "ogTitle": "6 Month Agentic AI Training in Mohali | techcadd",
+    "ogDescription": "Learn Python, LangChain, RAG, LangGraph, safe tool calling and deployment through a structured six-month Agentic AI pathway in Mohali.",
+    "twitterTitle": "Agentic AI Training in Mohali | techcadd",
+    "twitterDescription": "Explore a six-month roadmap with LangChain, RAG, LangGraph and project-based AI agent development at techcadd Mohali.",
+    "robotsIndex": true,
+    "inSitemap": true,
+    "faqSchema": false,
+    "metaTitle": "6 Month Agentic AI Training in Mohali | techcadd",
+    "metaDescription": "Explore 6 Month Agentic AI Training in Mohali with LangChain, LangGraph, RAG, vector databases and AI agent projects at techcadd. Enquire about batches.",
+    "keywords": [
+      "6 month agentic ai training in mohali",
+      "agentic ai course in mohali",
+      "langchain training in mohali",
+      "langgraph training mohali",
+      "rag training in mohali",
+      "ai agents development course mohali",
+      "python agentic ai training",
+      "vector database course in mohali",
+      "llm application development training",
+      "agentic ai projects in mohali",
+      "human in the loop ai agent training",
+      "ai automation training near chandigarh",
+      "techcadd mohali agentic ai"
+    ]
+  },
+  "status": "published"
+}

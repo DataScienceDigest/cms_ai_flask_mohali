@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CMS Payload Generator</title>
+<style>
+  :root { --bg:#f3f6fb; --card:#fff; --text:#182235; --muted:#586477; --line:#cbd5e1; --accent:#205de5; --ok:#17582b; --okbg:#e9f8ed; --bad:#8d2525; --badbg:#fff0f0; --warn:#7a5200; --warnbg:#fff7e0; --code:#eef3fa; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#10151f; --card:#1a2231; --text:#e6ecf5; --muted:#9aa8bd; --line:#334057; --accent:#5b8cff; --ok:#8fe0a6; --okbg:#173323; --bad:#ffb0b0; --badbg:#3a1c1c; --warn:#ffd77a; --warnbg:#3a3017; --code:#141b29; } }
+  body { font-family: system-ui, Arial, sans-serif; background: var(--bg); margin: 0; color: var(--text); }
+  main { max-width: 880px; margin: 5vh auto; padding: 30px; background: var(--card); border-radius: 16px; box-shadow: 0 8px 32px #15274716; }
+  h1 { margin-top: 0; font-size: 26px; }
+  p.sub { color: var(--muted); }
+  label { display: block; font-weight: 600; margin: 16px 0 6px; }
+  input, textarea { width: 100%; box-sizing: border-box; padding: 11px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: var(--card); color: var(--text); }
+  textarea { resize: vertical; }
+  .row { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+  button { margin-top: 18px; padding: 12px 20px; background: var(--accent); color: #fff; border: 0; border-radius: 8px; font: inherit; font-weight: 600; cursor: pointer; }
+  button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); margin-left: 8px; }
+  button:disabled { opacity: .55; cursor: wait; }
+  #status { margin-top: 20px; padding: 14px; border-radius: 8px; display: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+  #status.run { background: var(--code); } #status.ok { background: var(--okbg); color: var(--ok); } #status.bad { background: var(--badbg); color: var(--bad); }
+  #issues { margin-top: 14px; padding: 14px; border-radius: 8px; background: var(--warnbg); color: var(--warn); display: none; }
+  #issues ul { margin: 6px 0 0; padding-left: 20px; }
+  #out { display: none; margin-top: 18px; }
+  #out textarea { height: 380px; font-family: ui-monospace, Consolas, monospace; font-size: 13px; background: var(--code); }
+</style>
+</head>
+<body>
+<main>
+  <h1>CMS Payload Generator</h1>
+  <p class="sub">Enter the course details. The payload is generated in several parallel calls, validated, and assembled automatically (usually 1–3 minutes).</p>
+  <form id="f">
+    <label for="title">Title (used exactly as title and h1)</label>
+    <input id="title" required value="6 Months Industrial Training in Mohali 2027 for BCA, BTech &amp; MCA Students">
+    <div class="row">
+      <div><label for="location">Location</label><input id="location" value="Mohali, Punjab, India"></div>
+      <div><label for="brand">Brand</label><input id="brand" value="techcadd"></div>
+    </div>
+    <label for="keywords">Keywords / technologies / additional instructions</label>
+    <textarea id="keywords" rows="5">Python, NumPy, Pandas, SQL, Machine Learning, Deep Learning, Data Visualization, Power BI, Live Projects and Deployment.</textarea>
+    <button id="go" type="submit">Generate Payload</button>
+    <button id="test" type="button" class="secondary">Test Connection</button>
+  </form>
+
+  <div id="status" role="status" aria-live="polite"></div>
+  <div id="issues"></div>
+  <div id="out">
+    <textarea id="json" spellcheck="false"></textarea>
+    <button id="copy" type="button">Copy JSON</button>
+    <button id="dl" type="button" class="secondary">Download .json</button>
+    <button id="post" type="button" style="background:#17803d;float:right">Post to CMS</button>
+    <div id="postres" style="display:none;margin-top:14px;padding:14px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere;font-family:ui-monospace,Consolas,monospace;font-size:13px"></div>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let timer, slug = "payload";
+
+function setStatus(cls, text) { const s = $("status"); s.style.display = "block"; s.className = cls; s.textContent = text; }
+
+$("test").onclick = async () => {
+  setStatus("run", "Testing connection...");
+  try {
+    const r = await fetch("/test", { method: "POST" }); const d = await r.json();
+    setStatus(d.success ? "ok" : "bad", d.success ? `Connected. Model: ${d.model}\n${d.reply}` : `Failed. Model: ${d.model}\n${d.error}`);
+  } catch (e) { setStatus("bad", "Could not reach Flask: " + e.message); }
+};
+
+$("f").onsubmit = async (e) => {
+  e.preventDefault();
+  $("go").disabled = true; $("out").style.display = "none"; $("issues").style.display = "none";
+  const t0 = Date.now();
+  timer = setInterval(() => setStatus("run", `Generating... ${Math.round((Date.now() - t0) / 1000)}s elapsed. Please keep this tab open.`), 1000);
+  try {
+    const r = await fetch("/generate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: $("title").value, location: $("location").value, brand: $("brand").value, keywords: $("keywords").value })
+    });
+    const d = await r.json();
+    if (!d.success) throw new Error(d.error || "Unknown error");
+    slug = d.payload.slug || "payload";
+    $("json").value = JSON.stringify(d.payload, null, 2);
+    $("out").style.display = "block";
+    setStatus("ok", `Done in ${Math.round((Date.now() - t0) / 1000)}s. ${Object.keys(d.payload).length} top-level fields.`);
+    if (d.issues && d.issues.length) {
+      const box = $("issues"); box.style.display = "block"; box.textContent = "Some fields could not be brought fully inside the limits after retries. Review before publishing:";
+      const ul = document.createElement("ul"); d.issues.forEach(i => { const li = document.createElement("li"); li.textContent = i; ul.appendChild(li); }); box.appendChild(ul);
+    }
+  } catch (err) { setStatus("bad", "Generation failed:\n" + err.message); }
+  finally { clearInterval(timer); $("go").disabled = false; }
+};
+
+$("copy").onclick = async () => { await navigator.clipboard.writeText($("json").value); $("copy").textContent = "Copied!"; setTimeout(() => $("copy").textContent = "Copy JSON", 1500); };
+$("dl").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([$("json").value], { type: "application/json" }));
+  a.download = slug + ".json"; a.click();
+};
+
+$("post").onclick = async () => {
+  let payload;
+  try { payload = JSON.parse($("json").value); } catch (e) { return showPost(false, "The JSON in the box is invalid: " + e.message); }
+  if (!confirm(`Post "${payload.title}" to the CMS?`)) return;
+  const btn = $("post"); btn.disabled = true; btn.textContent = "Posting...";
+  try {
+    const r = await fetch("/publish", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ payload }) });
+    const d = await r.json();
+    const body = typeof d.response === "string" ? d.response : JSON.stringify(d.response, null, 2);
+    showPost(d.success, d.success ? `Posted successfully (HTTP ${d.status})\n\n${body}` : `Post failed${d.status ? " (HTTP " + d.status + ")" : ""}\n\n${d.error || body}`);
+  } catch (e) { showPost(false, "Could not reach Flask: " + e.message); }
+  finally { btn.disabled = false; btn.textContent = "Post to CMS"; }
+};
+function showPost(ok, text) {
+  const b = $("postres"); b.style.display = "block"; b.textContent = text;
+  b.style.background = ok ? "var(--okbg)" : "var(--badbg)"; b.style.color = ok ? "var(--ok)" : "var(--bad)";
+}
+</script>
+</body>
+</html>

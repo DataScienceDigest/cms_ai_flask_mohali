@@ -1,0 +1,32 @@
+A Security Operations Centre (SOC) monitors systems for threats, and threat hunting proactively searches for hidden attackers. The SOC & Threat Hunting in Cyber Security project-based course at techcadd Mohali is built around learning by building projects, so you finish with skills you can use, not just theory.
+
+About the SOC & Threat Hunting in Cyber Security project-based course in Mohali
+If you are looking for a SOC & Threat Hunting in Cyber Security project-based course in Mohali, techcadd Mohali offers practical, trainer-led learning with hands-on exercises and project work. The programme suits students, graduates, job seekers, career switchers and working professionals from Mohali, Chandigarh, Panchkula, Zirakpur and nearby areas.
+
+What you will learn
+The syllabus typically covers these topics, and your trainer shares the current, detailed curriculum at enrolment:
+SOC workflow and roles
+Log analysis
+SIEM fundamentals
+Alert triage
+Threat hunting techniques
+MITRE ATT&CK framework
+Incident response basics
+
+Tools and technologies covered
+Splunk
+Wazuh
+Elastic Stack
+Wireshark
+MITRE ATT&CK
+
+Career opportunities after the SOC & Threat Hunting in Cyber Security project-based course
+Learners with SOC & Threat Hunting in Cyber Security skills can explore roles such as:
+Security Analyst
+SOC Analyst
+Junior Penetration Tester
+Cyber Security Trainee
+Actual roles and salaries depend on your skills, projects, interview performance and the employer.
+
+Why learn SOC & Threat Hunting in Cyber Security at techcadd Mohali
+techcadd provides career-oriented guidance and placement assistance, including help with projects, portfolio development and interview preparation. Placement support is assistance, not a guarantee of a job. Contact techcadd Mohali for current fees, duration and batch timings.
