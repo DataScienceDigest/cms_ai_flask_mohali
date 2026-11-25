@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>techcadd Blog Generator</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f1f5f9;font:15px system-ui;color:#172033}main{max-width:960px;margin:36px auto;padding:0 18px}header{margin-bottom:22px}h1{margin:0 0 8px}h2{font-size:18px;margin:0 0 16px}section{background:white;border:1px solid #dbe3ed;border-radius:12px;padding:22px;margin:16px 0}label{display:block;font-weight:600;margin:12px 0 6px}input,textarea{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:7px;font:inherit}textarea{resize:vertical}#blog-payload{font:13px monospace;min-height:350px}button{border:0;border-radius:7px;background:#2563eb;color:white;padding:11px 18px;font:600 14px system-ui;cursor:pointer;margin:12px 8px 0 0}button:disabled{opacity:.5;cursor:not-allowed}#publish{background:#15803d}#copy,#download{background:#475569}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f8fafc;padding:12px;border-radius:6px}p{line-height:1.5}.muted{color:#64748b}.ok{color:#15803d}.error{color:#b91c1c}img{max-width:240px;max-height:160px;border-radius:8px;display:block;margin:12px 0} [hidden]{display:none!important}
+</style>
+</head>
+<body><main>
+<header><h1>techcadd Blog Generator</h1><p class="muted">Upload image → Generate with OpenAI → Review JSON → Post to Mohali CMS</p></header>
+<section><h2>1. Upload blog cover image</h2>
+<form action="/upload" method="POST" enctype="multipart/form-data"><input type="hidden" name="upload_type" value="blog"><input type="file" name="image" accept="image/*" required><button id="upload" type="submit">Upload Image</button></form>
+<p id="upload-status" role="status"></p><img id="preview" alt="Uploaded blog cover" hidden><pre id="creds" hidden></pre></section>
+<section><h2>2. Generate blog using OpenAI</h2>
+<label for="topic">Blog title / topic</label><input id="topic" placeholder="Agentic AI in Mohali: A Complete Beginner's Guide">
+<label for="keywords">Additional keywords / instructions (optional)</label><textarea id="keywords" rows="4" placeholder="Technologies, target audience, FAQs, location..."></textarea>
+<button id="generate" type="button" disabled>Generate Blog Payload</button><p id="generation-status" role="status"></p></section>
+<section><h2>3. Review and publish JSON</h2><label for="blog-payload">Generated JSON payload (editable)</label><textarea id="blog-payload" spellcheck="false" placeholder="Your complete blog JSON will appear here."></textarea>
+<button id="copy" disabled>Copy JSON</button><button id="download" disabled>Download JSON</button><button id="publish" disabled>Post to CMS</button><p id="publish-status" role="status"></p><pre id="cms-response" hidden></pre></section>
+</main><script>
+const el = id => document.getElementById(id);
+let credentials = {{ res | tojson }};
+let busy = false, posted = false, generated = false;
+function message(id, text, type='') { el(id).textContent=text; el(id).className=type; }
+function refresh(){
+  el('upload').disabled=busy; el('generate').disabled=busy||!credentials;
+  el('copy').disabled=busy||!generated; el('download').disabled=busy||!generated;
+  el('publish').disabled=busy||!generated||posted||!credentials;
+}
+function showCredentials(){
+  if(!credentials)return;
+  el('creds').hidden=false; el('creds').textContent=JSON.stringify(credentials,null,2);
+  message('upload-status','Image uploaded successfully.','ok');
+  el('preview').src=new URL(credentials.url1,'https://cms.techcaddmohali.com').href;
+  el('preview').hidden=false;
+}
+async function requestJSON(url, options){
+  const response=await fetch(url,options); const data=await response.json();
+  if(!response.ok||!data.success) { const error=new Error(data.error||'CMS/API request failed'); error.details=data; throw error; }
+  return data;
+}
+function postJSON(url,data){return requestJSON(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}
+function resetOutput(){ generated=false; posted=false; el('blog-payload').value=''; el('cms-response').hidden=true; message('publish-status',''); }
+el('generate').addEventListener('click',async()=>{
+  const title=el('topic').value.trim(); if(!title){message('generation-status','Enter a blog topic first.','error');return;}
+  busy=true;resetOutput();refresh();message('generation-status','Generating and validating blog with OpenAI...');
+  try{const data=await postJSON('/generate-blog',{title,keywords:el('keywords').value});el('blog-payload').value=JSON.stringify(data.payload,null,2);generated=true;message('generation-status','Blog ready. Cover image credentials inserted automatically.','ok');}
+  catch(error){message('generation-status',error.message,'error');}
+  finally{busy=false;refresh();}
+});
+el('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(el('blog-payload').value);message('publish-status','JSON copied.','ok');}catch(error){el('blog-payload').select();message('publish-status','Select and copy the JSON manually.');}});
+el('download').addEventListener('click',()=>{try{const payload=JSON.parse(el('blog-payload').value);const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=(String(payload.slug||'blog').replace(/[^a-z0-9-]/gi,'-'))+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(error){message('publish-status','Invalid JSON: '+error.message,'error');}});
+el('publish').addEventListener('click',async()=>{
+  let payload;try{payload=JSON.parse(el('blog-payload').value);}catch(error){message('publish-status','Invalid JSON: '+error.message,'error');return;}
+  if(!confirm('Publish this blog to Mohali CMS?'))return;
+  busy=true;refresh();message('publish-status','Posting blog to CMS...');el('cms-response').hidden=true;
+  try{const data=await postJSON('/publish-blog',{payload});posted=true;message('publish-status','Blog posted successfully (HTTP '+data.status+').','ok');el('cms-response').textContent=JSON.stringify(data,null,2);el('cms-response').hidden=false;}
+  catch(error){message('publish-status',error.message,'error');el('cms-response').textContent=JSON.stringify(error.details||{error:error.message},null,2);el('cms-response').hidden=false;}
+  finally{busy=false;refresh();}
+});
+showCredentials();refresh();
+</script></body></html>

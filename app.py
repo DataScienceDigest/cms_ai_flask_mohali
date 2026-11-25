@@ -880,5 +880,172 @@ def publish_page():
             error=str(e)
         ), 502
 
+# Paste into existing app.py BEFORE the if __name__ == '__main__' block.
+# Reuses app, make_llm(), strip_fences(), and the existing .env setup.
+import copy
+import json
+import os
+import re
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from flask import jsonify, render_template, request, session
+import requests
+
+BLOG_CMS = 'https://cms.techcaddmohali.com'
+BLOG_REFERENCE = Path(__file__).resolve().parent / 'blogs_reference_payload.json'
+BLOG_ATTEMPTS = 3
+
+
+def blog_headers(referer, json_request=False):
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'en-US,en;q=0.9',
+        'content-type': 'application/json',
+        'origin': 'https://cms.techcaddmohali.com',
+        'priority': 'u=1, i',
+        'referer': 'https://cms.techcaddmohali.com/blogs/new',
+        'sec-ch-ua': '"Chromium";v="158", "Not.A/Brand";v="24", "Google Chrome";v="158"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36',
+        'Cookie': '_ga=GA1.1.1993469050.1795078505; techcadd_session=s%3A0790112d-e09c-41cd-a6e8-df5819420bf4.RnbrMyp%2B6bp2bQkO76qamhkcAkUmhuDuI508%2FJ%2Behzo; _clck=1pfe81f%5E2%5Egbg%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795590232$o11$g1$t1795591132$j31$l0$h0; _clsk=xmze6p%5E1795591133868%5E3%5E1%5Eo.clarity.ms%2Fcollect'
+        }
+    if json_request:
+        headers['content-type'] = 'application/json'
+    return headers
+
+
+def blog_ref():
+    return json.loads(BLOG_REFERENCE.read_text(encoding='utf-8'))
+
+
+def blog_response(response):
+    try:
+        return response.json()
+    except ValueError:
+        return response.text
+
+
+blogs_reference_payload = blog_ref()
+
+
+@app.get('/blogsupload')
+def blogsupload():
+    return render_template('blogsupload.html', res=session.get('image_credentials'), reference_payload=blog_ref())
+
+
+@app.post('/generate-blog')
+def generate_blog():
+    data = request.get_json(silent=True) or {}
+    title = str(data.get('title') or '').strip()
+    extra = str(data.get('keywords') or '').strip()
+    creds = dict(session.get('image_credentials') or {})
+    creds.update(session.get('image_dimensions') or {})
+    if not title:
+        return jsonify(success=False, error='Enter a blog topic.'), 400
+    if not creds.get('thumbnailId1') or not creds.get('url1'):
+        return jsonify(success=False, error='Upload a blog image first.'), 400
+    try:
+        ref = blog_ref()
+        if not all(isinstance(creds.get(k), int) and creds[k] > 0 for k in ('width', 'height')):
+            raise ValueError('Image dimensions missing from upload response. Check session image_dimensions.')
+        size = len(ref['body'])
+        tag_count = len(ref['tags'])
+        keyword_count = len(ref['seo']['keywords'])
+        prompt = f'''Act as a senior SEO strategist, semantic SEO, local SEO, AEO and GEO expert.
+Write a complete student-focused blog for techcadd Mohali.
+Title: {title}
+Additional instructions: {extra}
+Always spell the brand techcadd. Use Mohali and Chandigarh naturally when relevant.
+Answer the main question early. Include a linked table of contents with matching heading IDs,
+clear explanations, practical examples, learning roadmap where relevant, career context, FAQs and CTA.
+Use valid HTML (p, h2, h3, ul, ol, li, strong, a). No Markdown or scripts.
+Only reuse relevant internal URLs from the reference; never invent links, fees, salaries, certificates,
+placements, reviews, batch dates, rankings or indexing guarantees. Label illustrative curricula clearly.
+Use the reference for structure, detail and length, not its old topic.
+Return ONLY one JSON object with these keys:
+body (HTML, approximately {size} characters), excerpt (120-160 characters),
+tags (exactly {tag_count} nonempty strings), alt (descriptive image alt text),
+metaTitle (approximately 50-60 characters), metaDescription (140-160 characters),
+keywords (exactly {keyword_count} nonempty strings).
+Do not generate IDs, image URLs, status or other system fields; Python handles these.
+REFERENCE BODY:
+{ref['body']}
+REFERENCE SEO:
+{json.dumps(ref['seo'], ensure_ascii=False)}'''
+        llm = make_llm(True)
+        feedback = ''
+        for attempt in range(BLOG_ATTEMPTS):
+            try:
+                result = json.loads(strip_fences(llm.invoke(prompt + feedback).content))
+                if not isinstance(result, dict):
+                    raise ValueError('Expected JSON object')
+                for key, lo, hi in [('body', int(size*.7), int(size*1.3)),
+                                    ('excerpt', 120, 160), ('alt', 10, 200),
+                                    ('metaTitle', 45, 65), ('metaDescription', 140, 160)]:
+                    val = result.get(key)
+                    if not isinstance(val, str) or not lo <= len(val.strip()) <= hi:
+                        raise ValueError(f'{key} must be {lo}-{hi} characters')
+                for key, count in [('tags', tag_count), ('keywords', keyword_count)]:
+                    val = result.get(key)
+                    if not isinstance(val, list) or len(val) != count or not all(isinstance(x, str) and x.strip() for x in val):
+                        raise ValueError(f'{key} must contain exactly {count} strings')
+                if not re.search(r'<h2\b', result['body']) or '<p>' not in result['body']:
+                    raise ValueError('Body requires HTML headings and paragraphs')
+                if re.search(r'<\s*(script|iframe|object|embed)\b|\son\w+\s*=|javascript\s*:', result['body'], re.I):
+                    raise ValueError('Unsafe HTML detected')
+                break
+            except Exception as exc:
+                feedback = f'\nPrevious attempt failed: {exc}. Return the entire corrected JSON object.'
+        else:
+            raise ValueError(f'Blog generation failed after {BLOG_ATTEMPTS} attempts: {feedback}')
+        payload = copy.deepcopy(ref)
+        payload.update(title=title, slug=re.sub(r'[^a-z0-9]+', '-', title.lower().replace("'", '')).strip('-'),
+                       tags=result['tags'], excerpt=result['excerpt'], body=result['body'],
+                       publishDate=datetime.now(timezone(timedelta(hours=5, minutes=30))).date().isoformat())
+        payload['coverImage'].update(id=creds['thumbnailId1'], url=creds['url1'], alt=result['alt'],
+                                     width=creds['width'], height=creds['height'])
+        payload['seo'].update(metaTitle=result['metaTitle'], metaDescription=result['metaDescription'], keywords=result['keywords'])
+        return jsonify(success=True, payload=payload)
+    except Exception as exc:
+        return jsonify(success=False, error=str(exc)), 500
+
+
+@app.post('/publish-blog')
+def publish_blog():
+    data = request.get_json(silent=True) or {}
+    payload = data.get('payload')
+    creds = dict(session.get('image_credentials') or {})
+    creds.update(session.get('image_dimensions') or {})
+    try:
+        ref = blog_ref()
+        if not isinstance(payload, dict) or set(payload) != set(ref):
+            raise ValueError('Payload must have the original blog JSON fields.')
+        for key in ('authorId', 'categoryId', 'status'):
+            if payload[key] != ref[key]:
+                raise ValueError(f'{key} must match the reference.')
+        cover = payload.get('coverImage')
+        if not creds or not isinstance(cover, dict) or cover.get('id') != creds.get('thumbnailId1') or cover.get('url') != creds.get('url1'):
+            raise ValueError('Image credentials changed. Generate the blog again with the current image.')
+        if not all(isinstance(creds.get(k), int) and creds[k] > 0 for k in ('width', 'height')):
+            raise ValueError('Image dimensions missing from upload response.')
+        cover.update(width=creds['width'], height=creds['height'])
+        if not all(isinstance(payload.get(k), str) and payload[k].strip() for k in ('title', 'slug', 'body', 'excerpt')):
+            raise ValueError('Title, slug, body and excerpt are required.')
+        response = requests.post(BLOG_CMS + '/api/blogs',
+                                 headers=blog_headers('/blogs/new', True),
+                                 json=payload, timeout=120)
+        return jsonify(success=response.ok, status=response.status_code,
+                       response=blog_response(response)), 200 if response.ok else 502
+    except ValueError as exc:
+        return jsonify(success=False, error=str(exc)), 400
+    except Exception as exc:
+        return jsonify(success=False, error=str(exc)), 502
+
+
+
 if __name__ == "__main__":
     app.run(debug=False, port=5000, threaded=True)
