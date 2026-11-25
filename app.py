@@ -1046,6 +1046,111 @@ def publish_blog():
         return jsonify(success=False, error=str(exc)), 502
 
 
+# =======================
+
+FAQ_CATEGORIES = (
+    'Digital Marketing', 'Artificial Intelligence & Data',
+    'Full-Stack Development', 'Cyber Security & Cloud',
+    'CAD / CAM & Design', 'Core Programming', 'General',
+)
+FAQ_API_URL = 'https://cms.techcaddmohali.com/api/faqs'
+FAQ_MAX_COUNT = 50
+
+
+def faq_validate_items(items):
+    if not isinstance(items, list) or not 1 <= len(items) <= FAQ_MAX_COUNT:
+        raise ValueError('Expected 1 to 50 FAQs.')
+    clean = []
+    seen = set()
+    for i, item in enumerate(items):
+        if not isinstance(item, dict):
+            raise ValueError(f'FAQ {i+1} must be an object.')
+        q, a = item.get('question'), item.get('answer')
+        if not isinstance(q, str) or not isinstance(a, str) or not q.strip() or not a.strip():
+            raise ValueError(f'FAQ {i+1} needs a question and answer.')
+        q, a = q.strip(), a.strip()
+        key = ' '.join(q.casefold().rstrip('?').split())
+        if key in seen:
+            raise ValueError(f'Duplicate question: {q}')
+        seen.add(key)
+        clean.append({'question': q, 'answer': a})
+    return clean
+
+
+@app.get('/faqsupload')
+def faqsupload():
+    return render_template('faqsupload.html', categories=FAQ_CATEGORIES, max_count=FAQ_MAX_COUNT)
+
+
+@app.post('/generate-faqs')
+def generate_faqs():
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return jsonify(success=False, error='Invalid request.'), 400
+    topic = data.get('topic', '')
+    category = data.get('categoryName')
+    count = data.get('count')
+    if not isinstance(topic, str) or not topic.strip() or len(topic) > 500:
+        return jsonify(success=False, error='Enter a topic of 1–500 characters.'), 400
+    if category not in FAQ_CATEGORIES or type(count) is not int or not 1 <= count <= FAQ_MAX_COUNT:
+        return jsonify(success=False, error='Select a valid category and FAQ count.'), 400
+    prompt = f'''Act as an SEO, AEO, GEO and semantic content specialist for techcadd Mohali.
+Topic: {topic.strip()}
+Category: {category}
+Generate exactly {count} distinct student-focused FAQs. Use natural English and direct, helpful answers (approximately 40–80 words each where appropriate). Cover relevant student search intent, technical concepts, practical projects, eligibility, learning paths and career considerations. Use Mohali and nearby areas only where relevant. Always spell techcadd in lowercase. Do not invent fees, batch dates, certificates, placements, rankings or guarantees. Refer students to techcadd for unconfirmed details. No HTML or Markdown. Return only a JSON object with this shape: {{"items":[{{"question":"...","answer":"..."}}]}}.'''
+    feedback = ''
+    for attempt in range(3):
+        try:
+            raw = make_llm(True).invoke(prompt + feedback).content
+            parsed = json.loads(raw)
+            items = faq_validate_items(parsed.get('items'))
+            if len(items) != count:
+                raise ValueError(f'Expected {count} FAQs, received {len(items)}.')
+            payloads = [dict(item, categoryName=category, order=i, featured=False, status='published') for i, item in enumerate(items)]
+            return jsonify(success=True, items=payloads)
+        except Exception as exc:
+            feedback = '\nPrevious output was invalid. Return the complete corrected JSON with exactly the requested count and distinct questions.'
+            app.logger.warning('FAQ generation attempt %s failed: %s', attempt+1, type(exc).__name__)
+    return jsonify(success=False, error='FAQ generation failed after three attempts. Check the model configuration and server logs.'), 502
+
+
+@app.post('/publish-faq')
+def publish_faq():
+    # One CMS POST per FAQ. Browser sequences the calls and displays each result.
+    data = request.get_json(silent=True) or {}
+    payload = data.get('payload') if isinstance(data, dict) else None
+    try:
+        item = faq_validate_items([payload])[0]
+        category = payload.get('categoryName')
+        order = payload.get('order', 0)
+        if category not in FAQ_CATEGORIES or type(order) is not int or order < 0:
+            raise ValueError('Invalid category or order.')
+        payload = dict(item, categoryName=category, order=order, featured=False, status='published')
+    except ValueError as exc:
+        return jsonify(success=False, error=str(exc)), 400
+    
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'en-US,en;q=0.9',
+        'content-type': 'application/json',
+        'origin': 'https://cms.techcaddmohali.com',
+        'priority': 'u=1, i',
+        'referer': 'https://cms.techcaddmohali.com/faqs/new',
+        'sec-ch-ua': '"Chromium";v="158", "Not.A/Brand";v="24", "Google Chrome";v="158"',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36',
+        'Cookie': '_ga=GA1.1.1993469050.1795078505; techcadd_session=s%3A0790112d-e09c-41cd-a6e8-df5819420bf4.RnbrMyp%2B6bp2bQkO76qamhkcAkUmhuDuI508%2FJ%2Behzo; _clck=1pfe81f%5E2%5Egbg%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795595839$o12$g1$t1795595901$j60$l0$h0; _clsk=2qdlyt%5E1795595903440%5E2%5E1%5Ef.clarity.ms%2Fcollect'
+        }
+    
+    try:
+        response = requests.post(FAQ_API_URL, headers=headers, json=payload, timeout=60, allow_redirects=False)
+        try:
+            result = response.json()
+        except ValueError:
+            result = response.text[:3000]
+        success = 200 <= response.status_code < 300 and isinstance(result, (dict, list)) and not (isinstance(result, dict) and (result.get('fieldErrors') or result.get('success') is False))
+        return jsonify(success=success, status=response.status_code, response=result), 200 if success else 502
+    except requests.RequestException:
+        return jsonify(success=False, uncertain=True, error='CMS connection failed. Verify whether the FAQ was created before retrying.'), 502
 
 if __name__ == "__main__":
     app.run(debug=False, port=5000, threaded=True)
