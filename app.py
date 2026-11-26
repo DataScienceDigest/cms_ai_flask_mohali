@@ -3,17 +3,9 @@ from flask import Flask, request, send_file, jsonify, Response
 from flask import Flask, render_template, request, jsonify, session
 from werkzeug.utils import secure_filename
 import requests
-import tempfile
-import mimetypes
-import os
-from flask import Flask, request, send_file, Response, jsonify
-import requests
-import os
 import os, re, ast, json, uuid, copy
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
-import requests
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 from langchain_openai import ChatOpenAI
@@ -1152,5 +1144,12 @@ def publish_faq():
     except requests.RequestException:
         return jsonify(success=False, uncertain=True, error='CMS connection failed. Verify whether the FAQ was created before retrying.'), 502
 
+# if __name__ == "__main__":
+#     app.run(debug=False, port=5000, threaded=True)
+
 if __name__ == "__main__":
-    app.run(debug=False, port=5000, threaded=True)
+    app.run(
+        host="0.0.0.0",
+        port=8000,
+        debug=False
+    )
