@@ -1,54 +1,52 @@
-
-from flask import Flask, request, send_file, jsonify, Response
-from flask import Flask, render_template, request, jsonify, session
-from werkzeug.utils import secure_filename
-import requests
-import os, re, ast, json, uuid, copy
+import ast
+import copy
+import json
+import os
+import re
+import uuid
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+import requests
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session
 from langchain_openai import ChatOpenAI
+from werkzeug.utils import secure_filename
 
 load_dotenv()
 BASE = Path(__file__).parent
 REFERENCE_PATH = Path(os.getenv("REFERENCE_PAYLOAD") or BASE / "reference_payload.json")
 MAX_ATTEMPTS = 3
-
+CMS_BASE = "https://cms.techcaddmohali.com"
 HEADERS_FILE = Path(os.getenv("CMS_HEADERS_FILE") or BASE / "cms_headers.txt")
 
 
-def load_cms_headers():
-    """Read CMS headers from cms_headers.txt (preferred) or the CMS_HEADERS env var.
-    Accepts JSON or a Python-style dict with single quotes, multi-line, as copied from
-    Postman / browser 'copy as Python'."""
-    if HEADERS_FILE.exists():
-        raw = HEADERS_FILE.read_text(encoding="utf-8").strip()
-    else:
-        raw = (os.getenv("CMS_HEADERS") or "").strip()
-    if not raw:
-        raise ValueError(f"No CMS headers found. Create {HEADERS_FILE.name} next to app.py.")
-    raw = re.sub(r"^\s*headers\s*=\s*", "", raw)  # allow "headers = {...}"
-    try:
-        headers = json.loads(raw)
-    except json.JSONDecodeError:
-        try:
-            headers = ast.literal_eval(raw)
-        except (ValueError, SyntaxError) as e:
-            raise ValueError(f"Could not parse the headers: {e}")
-    if not isinstance(headers, dict) or not headers:
-        raise ValueError("Headers must be a dictionary like {'Authorization': '...'}.")
-    # Let requests set these itself
-    drop = {"content-length", "host", "accept-encoding"}
-    return {str(k): str(v) for k, v in headers.items() if str(k).lower() not in drop}
+
+
+def cms_headers(referer, *, json_request=True, full_browser=False):
+    """Build CMS request headers from one shared configuration."""
+    headers = {
+            'accept': '*/*',
+            'accept-language': 'en-US,en;q=0.9',
+            'origin': 'https://cms.techcaddmohali.com',
+            'priority': 'u=1, i',
+            'referer': 'https://cms.techcaddmohali.com/',
+            'sec-ch-ua': '"Chromium";v="158", "Not.A/Brand";v="24", "Google Chrome";v="158"',
+         
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36',
+            'Cookie': '_ga=GA1.1.1993469050.1795078505; techcadd_session=s%3A0790112d-e09c-41cd-a6e8-df5819420bf4.RnbrMyp%2B6bp2bQkO76qamhkcAkUmhuDuI508%2FJ%2Behzo; _clck=1pfe81f%5E2%5Egbg%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795579102$o9$g1$t1795582201$j43$l0$h0; _clsk=13g2kvz%5E1795582203454%5E9%5E1%5Es.clarity.ms%2Fcollect',
+            }
+    
+    return headers
 
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.urandom(32)
-
 # --------------------------------------------------------------------------
 # LLM
 # --------------------------------------------------------------------------
+
 def make_llm(json_mode: bool):
     kwargs = {"response_format": {"type": "json_object"}} if json_mode else {}
     return ChatOpenAI(
@@ -59,21 +57,18 @@ def make_llm(json_mode: bool):
         model_kwargs=kwargs,
     )
 
-
 def strip_fences(text: str) -> str:
     text = (text or "").strip()
     text = re.sub(r"^```(?:json|html)?\s*", "", text)
     return re.sub(r"\s*```$", "", text).strip()
-
-
 # --------------------------------------------------------------------------
 # Validation helpers (all tolerant of missing / wrong-typed data)
 # --------------------------------------------------------------------------
+
 def rng(value, lo, hi, label, issues):
     n = len(value) if isinstance(value, str) else -1
     if not lo <= n <= hi:
         issues.append(f"{label}: {n} characters, must be {lo}-{hi}")
-
 
 def check_items(d, key, n, fields, issues, list_fields=None):
     items = d.get(key)
@@ -91,8 +86,6 @@ def check_items(d, key, n, fields, issues, list_fields=None):
             v = item.get(f)
             if not isinstance(v, list) or len(v) != size:
                 issues.append(f"{key}[{i}].{f}: must contain exactly {size} items")
-
-
 META_LIMITS = {
     "tagline": (100, 145), "eyebrow": (15, 35), "badge": (10, 25),
     "intro": (175, 220), "ctaPrimaryText": (20, 35), "ctaSecondaryText": (20, 35),
@@ -108,7 +101,6 @@ SEO_LIMITS = {
     "ogDescription": (110, 155), "twitterTitle": (35, 60), "twitterDescription": (100, 150),
 }
 
-
 def validate_meta(d):
     issues = []
     for k, (lo, hi) in META_LIMITS.items():
@@ -122,7 +114,6 @@ def validate_meta(d):
     if not isinstance(kw, list) or len(kw) != 13 or not all(isinstance(x, str) for x in kw):
         issues.append("seo.keywords: must be exactly 13 strings")
     return issues
-
 
 def validate_arrays(d):
     issues = []
@@ -143,14 +134,12 @@ def validate_arrays(d):
             rng(h, 40, 80, f"highlights[{i}]", issues)
     return issues
 
-
 def validate_syllabus(d):
     issues = []
     check_items(d, "syllabus", 10,
                 {"title": (35, 65), "body": (140, 175), "project": (60, 100)},
                 issues, {"topics": 4, "outcomes": 2, "tools": 4})
     return issues
-
 
 def html_validator(lo, hi, h2_count):
     def _v(html):
@@ -166,11 +155,10 @@ def html_validator(lo, hi, h2_count):
             issues.append("no Markdown allowed")
         return issues
     return _v
-
-
 # --------------------------------------------------------------------------
 # Generic "ask -> validate -> retry with feedback" loop
 # --------------------------------------------------------------------------
+
 def run_with_retries(llm, prompt, parse, validate, length_hint=None):
     """Returns (result, remaining_issues)."""
     best, best_issues, feedback = None, ["no output"], ""
@@ -198,28 +186,24 @@ def run_with_retries(llm, prompt, parse, validate, length_hint=None):
             elif n > hi:
                 feedback += f"\nThe text was {n} characters. Remove roughly {n - mid} characters."
     return best, best_issues
-
-
 # --------------------------------------------------------------------------
 # Prompts
 # --------------------------------------------------------------------------
+
 def context(title, location, brand, extra):
     return f"""You are a senior SEO strategist, semantic/local SEO expert, AEO/GEO expert,
 NLP content writer and CMS content specialist.
-
 COURSE INPUT
 Title: {title}
 Location: {location}
 Brand: {brand}  (always spell exactly "techcadd")
 Additional instructions / keywords / technologies: {extra}
-
 GLOBAL CONTENT RULES
 - Natural, humanized, informative, conversion-focused writing; no exaggerated marketing language.
 - No job guarantees, salaries, placement statistics, reviews, fake URLs or invented credentials.
 - Use location-specific search intent naturally; avoid keyword stuffing and repetition.
 - All character limits include spaces and punctuation. COUNT CAREFULLY and stay inside every range.
 """
-
 
 def trim_example(obj):
     """Shrink reference data to a small shape example."""
@@ -228,7 +212,6 @@ def trim_example(obj):
     if isinstance(obj, dict):
         return {k: trim_example(v) for k, v in obj.items()}
     return obj
-
 
 def prompt_meta(ctx):
     return ctx + f"""
@@ -246,7 +229,6 @@ format (e.g. "A short introductory workshop"); comparisonNote = disclaimer that 
 criteria, not claims about a named competitor; syllabusNote = disclaimer to verify batch details.
 Return only the JSON object."""
 
-
 def prompt_arrays(ctx, ref):
     shape = {k: trim_example(ref.get(k)) for k in
              ["audience", "benefits", "careerRoles", "projects", "workflow",
@@ -254,7 +236,6 @@ def prompt_arrays(ctx, ref):
     return ctx + f"""
 TASK: Return ONE JSON object with these keys (shape example below is only for FORMAT, never copy its content).
 Omit "id" fields (they are added by code).
-
 RULES
 - audience: exactly 5 objects {{title 20-40 chars, body 110-140 chars}} (who can join)
 - benefits: exactly 6 {{title 25-40, body 100-140}}
@@ -266,12 +247,9 @@ RULES
 - toolItems: exactly 21 {{name, category, url}} relevant tools; official URL only if you are
   confident, otherwise ""
 - highlights: exactly 6 strings, each 40-80 chars, about technical skills and practical outcomes
-
 FORMAT EXAMPLE
 {json.dumps(shape, ensure_ascii=False, indent=1)}
-
 Return only the JSON object."""
-
 
 def prompt_syllabus(ctx, ref):
     shape = trim_example({"syllabus": ref.get("syllabus", [])})
@@ -284,12 +262,9 @@ TASK: Return ONE JSON object {{"syllabus": [...]}} with exactly 10 detailed modu
 - Each module: title (35-65 chars), topics (exactly 4 strings), body (140-175 chars),
   outcomes (exactly 2 strings), tools (exactly 4 strings), project (60-100 chars).
 - Omit "id" (added by code).
-
 FORMAT EXAMPLE (shape only)
 {json.dumps(shape, ensure_ascii=False, indent=1)}
-
 Return only the JSON object."""
-
 
 def prompt_html(ctx, kind, sections, lo, hi, extra_rules):
     return ctx + f"""
@@ -300,22 +275,18 @@ TASK: Write the "{kind}" HTML field.
 - Only h2, p, strong tags. Valid HTML. No Markdown, no newlines needed between blocks.
 {extra_rules}
 Return ONLY the raw HTML, no code fences, no commentary."""
-
-
 DESC_RULES = """- Include: technical explanations, tool/technology explanations, practical industry use cases,
   career opportunities (no guarantees), eligibility, practical projects, location-based search intent,
   direct answers to common student questions, and a natural enquiry call to action at the end."""
 OVERVIEW_RULES = """- It must COMPLEMENT the description, not duplicate it. Use different headings and angles.
   Avoid these headings already used in the description: {used}"""
-
-
 # --------------------------------------------------------------------------
 # Assembly
 # --------------------------------------------------------------------------
+
 def slugify(title):
     s = re.sub(r"[^a-z0-9]+", "-", title.lower())
     return s.strip("-")
-
 
 def with_id(item, order):
     out = {"id": str(uuid.uuid4())}
@@ -323,13 +294,11 @@ def with_id(item, order):
         out[k] = item.get(k, "" if k not in ("topics", "outcomes", "tools", "tags") else [])
     return out
 
-
 def assemble(ref, title, location, meta, arrays, syllabus, description, overview):
     g = {}
     g.update({k: v for k, v in meta.items() if k != "seo"})
     g.update(arrays)
     g.update(syllabus)
-
     g["audience"] = [with_id(i, ["title", "body"]) for i in g.get("audience", [])]
     g["benefits"] = [{**with_id(i, ["title", "body"]), "placement": "what-you-get"}
                      for i in g.get("benefits", [])]
@@ -345,7 +314,6 @@ def assemble(ref, title, location, meta, arrays, syllabus, description, overview
     g["toolItems"] = [with_id(i, ["name", "category", "url"]) for i in g.get("toolItems", [])]
     g["syllabus"] = [with_id(i, ["title", "topics", "body", "outcomes", "tools", "project"])
                      for i in g.get("syllabus", [])]
-
     g["careers"] = [r["role"] for r in g["careerRoles"]]
     g["tools"] = [t["name"] for t in g["toolItems"]]
     g["description"], g["overview"] = description, overview
@@ -355,7 +323,6 @@ def assemble(ref, title, location, meta, arrays, syllabus, description, overview
     seo = {**ref.get("seo", {}), **meta.get("seo", {})}
     seo.update(robotsIndex=True, inSitemap=True, faqSchema=False)
     g["seo"] = seo
-
     # Fixed fields always come from the reference (or required constants)
     fixed_keep = ["categoryId", "level", "mode"]
     empty_lists = ["facts", "plans", "faqIds", "reviewIds", "relatedIds",
@@ -370,7 +337,6 @@ def assemble(ref, title, location, meta, arrays, syllabus, description, overview
         g[k] = []
     for k in empty_strs:
         g[k] = ""
-
     # Build in exact reference order / field set
     final = {}
     for key, ref_val in ref.items():
@@ -380,7 +346,6 @@ def assemble(ref, title, location, meta, arrays, syllabus, description, overview
                 else False if isinstance(ref_val, bool) else ""
         final[key] = val
     return final
-
 
 def final_checks(ref, payload):
     issues = []
@@ -392,88 +357,26 @@ def final_checks(ref, payload):
             ids += [i["id"] for i in v if isinstance(i, dict) and "id" in i]
     if len(ids) != len(set(ids)):
         issues.append("duplicate UUIDs found")
-    for field in ("title", "h1"):
-        pass
     if payload.get("level") != ref.get("level") or payload.get("mode") != ref.get("mode"):
         issues.append("level/mode differ from reference")
     return issues
-
-
 # --------------------------------------------------------------------------
-# Orchestration
-# --------------------------------------------------------------------------
-def generate_payload(title, location, brand, extra):
-    ref = json.loads(REFERENCE_PATH.read_text(encoding="utf-8"))
-    ctx = context(title, location, brand, extra)
-    llm_json, llm_text = make_llm(True), make_llm(False)
-    problems = {}
-
-    def parse_json(t):
-        data = json.loads(strip_fences(t))
-        if not isinstance(data, dict):
-            raise ValueError("top-level JSON must be an object")
-        return data
-
-    def job_meta():
-        return run_with_retries(llm_json, prompt_meta(ctx), parse_json, validate_meta)
-
-    def job_arrays():
-        return run_with_retries(llm_json, prompt_arrays(ctx, ref), parse_json, validate_arrays)
-
-    def job_syllabus():
-        return run_with_retries(llm_json, prompt_syllabus(ctx, ref), parse_json, validate_syllabus)
-
-    def job_html():
-        template = SHORT_TEMPLATE_PATH.read_text(encoding="utf-8").strip()
-        desc, d_issues = run_with_retries(
-            llm_text, prompt_desc_short(title, location, brand, extra, template),
-            strip_fences, validate_desc_short)
-        used = ", ".join(re.findall(r"<h2><strong>(.*?)</strong></h2>", desc or ""))
-        ov_rules = OVERVIEW_RULES.format(used=used)
-        ov, o_issues = run_with_retries(
-            llm_text, prompt_html(ctx, "overview", 8, 1500, 2000, ov_rules),
-            strip_fences, html_validator(1500, 2000, 8), length_hint=(1500, 2000))
-        return desc, d_issues, ov, o_issues
-
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        f_meta, f_arr = pool.submit(job_meta), pool.submit(job_arrays)
-        f_syl, f_html = pool.submit(job_syllabus), pool.submit(job_html)
-        meta, problems["meta"] = f_meta.result()
-        arrays, problems["arrays"] = f_arr.result()
-        syllabus, problems["syllabus"] = f_syl.result()
-        desc, problems["description"], ov, problems["overview"] = f_html.result()
-
-    payload = assemble(ref, title, location, meta or {}, arrays or {}, syllabus or {},
-                       desc or "", ov or "")
-    all_issues = [f"[{k}] {i}" for k, v in problems.items() for i in (v or [])]
-    all_issues += final_checks(ref, payload)
-    return payload, all_issues
-
-
-# --------------------------------------------------------------------------
-# Routes
-# --------------------------------------------------------------------------
-# --------------------------------------------------------------------------
-# Short content (follows short_template.txt)
+# Short content and description
 # --------------------------------------------------------------------------
 SHORT_TEMPLATE_PATH = BASE / "short_template.txt"
 SHORT_MIN, SHORT_MAX = 1700, 1900   # sample template is ~1,800 characters
 
-
 def prompt_short(title, location, brand, extra, template):
     return f"""You write short SEO course-page content for a training institute.
-
 NEW COURSE
 Title: {title}
 Location: {location}
 Brand: {brand} (always spell exactly "techcadd")
 Topics / tools / roles to use (from the user): {extra or "choose realistic ones for this course"}
-
 TEMPLATE (a finished example for a DIFFERENT course):
 \"\"\"
 {template}
 \"\"\"
-
 TASK: Write the same kind of content for the NEW COURSE.
 - Keep EXACTLY the same structure, section order, heading pattern, wording style and tone as the template.
 - Each heading on its own line; each list item (topics, tools, roles) on its own line; paragraphs as one block.
@@ -485,7 +388,6 @@ TASK: Write the same kind of content for the NEW COURSE.
 - No invented salaries, statistics, reviews or guarantees.
 - LENGTH: {SHORT_MIN}-{SHORT_MAX} characters including spaces and line breaks. Count carefully.
 Return ONLY the plain text. No Markdown, no HTML, no code fences, no commentary."""
-
 
 def validate_short(text):
     issues = []
@@ -499,25 +401,21 @@ def validate_short(text):
     if re.search(r"</?[a-zA-Z]+>|\*\*|```|^#", text, re.M):
         issues.append("plain text only: no HTML or Markdown")
     return issues
-
-
 # --------------------------------------------------------------------------
 # Short DESCRIPTION (HTML, same structure/length as short_template.txt)
 # --------------------------------------------------------------------------
+
 def prompt_desc_short(title, location, brand, extra, template):
     return f"""You write short SEO course-page content for a training institute.
-
 NEW COURSE
 Title: {title}
 Location: {location}
 Brand: {brand} (always spell exactly "techcadd")
 Topics / tools / roles to use (from the user): {extra or "choose realistic ones for this course"}
-
 TEMPLATE (plain-text example for a DIFFERENT course):
 \"\"\"
 {template}
 \"\"\"
-
 TASK: Write the "description" HTML field for the NEW COURSE in exactly the template's structure,
 wording style and tone.
 HTML FORMAT (only h2, p, strong tags):
@@ -534,7 +432,6 @@ So: exactly 5 <h2> and exactly 6 <p> (the intro <p> comes first, before any head
 - No invented salaries, statistics, reviews or guarantees. No Markdown.
 - LENGTH: the VISIBLE TEXT (ignoring HTML tags) must be {SHORT_MIN}-{SHORT_MAX} characters.
 Return ONLY the raw HTML, no code fences, no commentary."""
-
 
 def validate_desc_short(html):
     issues = []
@@ -555,12 +452,56 @@ def validate_desc_short(html):
     if "techcadd" not in html:
         issues.append('brand must be spelled "techcadd"')
     return issues
+# --------------------------------------------------------------------------
+# Orchestration
+# --------------------------------------------------------------------------
 
+def generate_payload(title, location, brand, extra):
+    ref = json.loads(REFERENCE_PATH.read_text(encoding="utf-8"))
+    ctx = context(title, location, brand, extra)
+    llm_json, llm_text = make_llm(True), make_llm(False)
+    problems = {}
+    def parse_json(t):
+        data = json.loads(strip_fences(t))
+        if not isinstance(data, dict):
+            raise ValueError("top-level JSON must be an object")
+        return data
+    def job_meta():
+        return run_with_retries(llm_json, prompt_meta(ctx), parse_json, validate_meta)
+    def job_arrays():
+        return run_with_retries(llm_json, prompt_arrays(ctx, ref), parse_json, validate_arrays)
+    def job_syllabus():
+        return run_with_retries(llm_json, prompt_syllabus(ctx, ref), parse_json, validate_syllabus)
+    def job_html():
+        template = SHORT_TEMPLATE_PATH.read_text(encoding="utf-8").strip()
+        desc, d_issues = run_with_retries(
+            llm_text, prompt_desc_short(title, location, brand, extra, template),
+            strip_fences, validate_desc_short)
+        used = ", ".join(re.findall(r"<h2><strong>(.*?)</strong></h2>", desc or ""))
+        ov_rules = OVERVIEW_RULES.format(used=used)
+        ov, o_issues = run_with_retries(
+            llm_text, prompt_html(ctx, "overview", 8, 1500, 2000, ov_rules),
+            strip_fences, html_validator(1500, 2000, 8), length_hint=(1500, 2000))
+        return desc, d_issues, ov, o_issues
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        f_meta, f_arr = pool.submit(job_meta), pool.submit(job_arrays)
+        f_syl, f_html = pool.submit(job_syllabus), pool.submit(job_html)
+        meta, problems["meta"] = f_meta.result()
+        arrays, problems["arrays"] = f_arr.result()
+        syllabus, problems["syllabus"] = f_syl.result()
+        desc, problems["description"], ov, problems["overview"] = f_html.result()
+    payload = assemble(ref, title, location, meta or {}, arrays or {}, syllabus or {},
+                       desc or "", ov or "")
+    all_issues = [f"[{k}] {i}" for k, v in problems.items() for i in (v or [])]
+    all_issues += final_checks(ref, payload)
+    return payload, all_issues
+
+# Course and connection routes
+# ------------------------------------------------------------------------
 
 @app.get("/")
 def index():
     return render_template("index.html")
-
 
 @app.post("/generate")
 def generate():
@@ -579,7 +520,6 @@ def generate():
     except Exception as e:
         return jsonify(success=False, error=f"{type(e).__name__}: {e}"), 500
 
-
 @app.post("/generate-short")
 def generate_short():
     data = request.get_json(silent=True) or {}
@@ -597,7 +537,6 @@ def generate_short():
     except Exception as e:
         return jsonify(success=False, error=f"{type(e).__name__}: {e}"), 500
 
-
 @app.post("/publish")
 def publish():
     """Post the (reviewed/edited) payload to the CMS API. Headers come from .env only."""
@@ -605,25 +544,8 @@ def publish():
     payload = data.get("payload")
     if not isinstance(payload, dict) or not payload:
         return jsonify(success=False, error="No payload received."), 400
-
     url = os.getenv("CMS_API_URL", "https://cms.techcaddmohali.com/api/courses")
-    
-    headers = {
-            'accept': '*/*',
-            'accept-language': 'en-US,en;q=0.9',
-            'content-type': 'application/json',
-            'origin': 'https://cms.techcaddmohali.com',
-            'priority': 'u=1, i',
-            'referer': 'https://cms.techcaddmohali.com/courses/new',
-            'sec-ch-ua': '"Chromium";v="158", "Not.A/Brand";v="24", "Google Chrome";v="158"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36',
-            'Cookie': '_ga=GA1.1.1993469050.1795078505; techcadd_session=s%3A0790112d-e09c-41cd-a6e8-df5819420bf4.RnbrMyp%2B6bp2bQkO76qamhkcAkUmhuDuI508%2FJ%2Behzo; _clck=1pfe81f%5E2%5Egbd%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795348389$o3$g1$t1795349391$j60$l0$h0; _clsk=17wx9qw%5E1795349393262%5E5%5E1%5Ej.clarity.ms%2Fcollect'
-            }
+    headers = cms_headers('/courses/new', json_request=True, full_browser=True)
     try:
         r = requests.post(url, headers=headers, data=json.dumps(payload, ensure_ascii=False).encode("utf-8"), timeout=60)
         try:
@@ -643,13 +565,12 @@ def test():
     except Exception as e:
         return jsonify(success=False, model=os.getenv("OPENAI_MODEL"), error=str(e)), 500
 
-
-
-
+# Image upload and pages
+# ------------------------------------------------------------------------
 API_URL = "https://cms.techcaddmohali.com/api/media"
-
-with open(r"C:\Users\Hp\Downloads\cms_ai_flask\cms_ai_flask_mohali\pages_reference_payload.json", "r", encoding="utf-8") as f:
+with open(BASE / "pages_reference_payload.json", "r", encoding="utf-8") as f:
     pages_reference_payload = json.load(f)
+
 @app.route("/imagesupload")
 def imagesupload():
     return render_template(
@@ -657,86 +578,61 @@ def imagesupload():
         res=session.get("image_credentials"),
         reference_payload=pages_reference_payload
     )
-
-
 UPLOAD_FOLDER = os.path.abspath("uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 @app.route("/upload", methods=["POST"])
 def upload_image():
-        image = request.files["image"]
-
-        filename = secure_filename(image.filename)
-
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-
-        image.save(file_path)
-
-        # Get complete absolute file path
-        complete_path = os.path.abspath(file_path)
-
-        print('=============',complete_path)
-        image_upload_headers = {
-            'accept': '*/*',
-            'accept-language': 'en-US,en;q=0.9',
-            'origin': 'https://cms.techcaddmohali.com',
-            'priority': 'u=1, i',
-            'referer': 'https://cms.techcaddmohali.com/',
-            'sec-ch-ua': '"Chromium";v="158", "Not.A/Brand";v="24", "Google Chrome";v="158"',
-         
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36',
-            'Cookie': '_ga=GA1.1.1993469050.1795078505; techcadd_session=s%3A0790112d-e09c-41cd-a6e8-df5819420bf4.RnbrMyp%2B6bp2bQkO76qamhkcAkUmhuDuI508%2FJ%2Behzo; _clck=1pfe81f%5E2%5Egbg%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795579102$o9$g1$t1795582201$j43$l0$h0; _clsk=13g2kvz%5E1795582203454%5E9%5E1%5Es.clarity.ms%2Fcollect',
-            }
-
-        url = "https://cms.techcaddmohali.com/api/media"
-
-
-
-        opened = []
-        file_paths = [
-                rf"{complete_path}"
-            ]
-        try:
-            files = []
-            for path in file_paths:
-                if not os.path.exists(path):
-                    print(f"❌ File not found: {path}")
-                    continue
-                f = open(path, "rb")
-                opened.append(f)
-                files.append(("files", (os.path.basename(path), f, "image/png")))
-
-            response = requests.post(url, headers=image_upload_headers, files=files, timeout=120)
-            print(response.status_code)
-            print(response.text)
-            image_data = response.json()[0]
-            res = {
-                "thumbnailId1": response.json()[0]['id'],
-                "url1": response.json()[0]['url']
-            }
-
-            # Save credentials for the next request
-            session["image_credentials"] = res
-
-            # Store actual dimensions if returned by API
-            session["image_dimensions"] = {
-                key: image_data[key]
-                for key in ("width", "height")
-                if image_data.get(key) is not None
-            }
-
-            print("Image Credentials:", res)
-
-            return render_template(
-                "imagesupload.html",
-                res=res,
-                reference_payload=pages_reference_payload
-            )
-        except Exception as e:
-            print(f"❌ Error: {e}")
-        finally:
-            for f in opened:
-                f.close()
-
+    image = request.files["image"]
+    filename = secure_filename(image.filename)
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    image.save(file_path)
+    # Get complete absolute file path
+    complete_path = os.path.abspath(file_path)
+    print('=============',complete_path)
+    image_upload_headers = cms_headers('/', json_request=False, full_browser=False)
+    url = API_URL
+    opened = []
+    file_paths = [
+            rf"{complete_path}"
+        ]
+    try:
+        files = []
+        for path in file_paths:
+            if not os.path.exists(path):
+                print(f"❌ File not found: {path}")
+                continue
+            f = open(path, "rb")
+            opened.append(f)
+            files.append(("files", (os.path.basename(path), f, "image/png")))
+        response = requests.post(url, headers=image_upload_headers, files=files, timeout=120)
+        print(response.status_code)
+        print(response.text)
+        image_data = response.json()[0]
+        res = {
+            "thumbnailId1": image_data['id'],
+            "url1": image_data['url']
+        }
+        # Save credentials for the next request
+        session["image_credentials"] = res
+        # Store actual dimensions if returned by API
+        session["image_dimensions"] = {
+            key: image_data[key]
+            for key in ("width", "height")
+            if image_data.get(key) is not None
+        }
+        print("Image Credentials:", res)
+        return render_template(
+            "imagesupload.html",
+            res=res,
+            reference_payload=pages_reference_payload
+        )
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return jsonify(success=False, error=str(e)), 502
+    finally:
+        for f in opened:
+            f.close()
 
 @app.post('/generate-page')
 def generate_page():
@@ -748,7 +644,6 @@ def generate_page():
         return jsonify(success=False, error='Topic is required.'), 400
     if not creds.get('thumbnailId1') or not creds.get('url1'):
         return jsonify(success=False, error='Upload an image first.'), 400
-
     try:
         ref = copy.deepcopy(pages_reference_payload)
         length = len(ref['content'])
@@ -797,7 +692,6 @@ REFERENCE SEO:
                 feedback = f'\nPrevious attempt failed: {exc}. Return the complete corrected JSON.'
         else:
             raise ValueError(f'Page generation failed after {MAX_ATTEMPTS} attempts: {feedback}')
-
         payload = copy.deepcopy(ref)
         payload['title'] = title
         payload['slug'] = slugify(title)
@@ -818,116 +712,62 @@ REFERENCE SEO:
 
 @app.post("/publish-page")
 def publish_page():
-
     data = request.get_json(silent=True) or {}
     payload = data.get("payload")
-
     if not isinstance(payload, dict) or not payload:
         return jsonify(
             success=False,
             error="Invalid or empty JSON payload."
         ), 400
-
     url = "https://cms.techcaddmohali.com/api/pages"
-
-    headers =  {
-    'accept': '*/*',
-    'accept-language': 'en-US,en;q=0.9',
-    'content-type': 'application/json',
-    'origin': 'https://cms.techcaddmohali.com',
-    'priority': 'u=1, i',
-    'referer': 'https://cms.techcaddmohali.com/pages/new',
-    'sec-ch-ua': '"Chromium";v="158", "Not.A/Brand";v="24", "Google Chrome";v="158"',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36',
-    'Cookie': '_ga=GA1.1.1993469050.1795078505; techcadd_session=s%3A0790112d-e09c-41cd-a6e8-df5819420bf4.RnbrMyp%2B6bp2bQkO76qamhkcAkUmhuDuI508%2FJ%2Behzo; _clck=1pfe81f%5E2%5Egbg%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795579102$o9$g1$t1795581535$j60$l0$h0; _clsk=13g2kvz%5E1795581537308%5E5%5E1%5Es.clarity.ms%2Fcollect'
-    }
-
+    headers = cms_headers('/pages/new', json_request=True, full_browser=False)
     try:
-
         response = requests.post(
             url,
             headers=headers,
             json=payload,
             timeout=120
         )
-
         print("CMS Status:", response.status_code)
         print("CMS Response:", response.text)
-
         try:
             result = response.json()
         except ValueError:
             result = response.text
-
         return jsonify(
             success=response.ok,
             status=response.status_code,
             response=result
         ), 200 if response.ok else 502
-
     except requests.RequestException as e:
-
         return jsonify(
             success=False,
             error=str(e)
         ), 502
 
-# Paste into existing app.py BEFORE the if __name__ == '__main__' block.
-# Reuses app, make_llm(), strip_fences(), and the existing .env setup.
-import copy
-import json
-import os
-import re
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from flask import jsonify, render_template, request, session
-import requests
-
+# Blog generation and publishing
+# ------------------------------------------------------------------------
 BLOG_CMS = 'https://cms.techcaddmohali.com'
 BLOG_REFERENCE = Path(__file__).resolve().parent / 'blogs_reference_payload.json'
-BLOG_ATTEMPTS = 3
-
+BLOG_ATTEMPTS = MAX_ATTEMPTS
 
 def blog_headers(referer, json_request=False):
-    headers = {
-        'accept': '*/*',
-        'accept-language': 'en-US,en;q=0.9',
-        'content-type': 'application/json',
-        'origin': 'https://cms.techcaddmohali.com',
-        'priority': 'u=1, i',
-        'referer': 'https://cms.techcaddmohali.com/blogs/new',
-        'sec-ch-ua': '"Chromium";v="158", "Not.A/Brand";v="24", "Google Chrome";v="158"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36',
-        'Cookie': '_ga=GA1.1.1993469050.1795078505; techcadd_session=s%3A0790112d-e09c-41cd-a6e8-df5819420bf4.RnbrMyp%2B6bp2bQkO76qamhkcAkUmhuDuI508%2FJ%2Behzo; _clck=1pfe81f%5E2%5Egbg%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795590232$o11$g1$t1795591132$j31$l0$h0; _clsk=xmze6p%5E1795591133868%5E3%5E1%5Eo.clarity.ms%2Fcollect'
-        }
-    if json_request:
-        headers['content-type'] = 'application/json'
+    headers = cms_headers(referer, json_request=True, full_browser=True)
     return headers
-
 
 def blog_ref():
     return json.loads(BLOG_REFERENCE.read_text(encoding='utf-8'))
-
 
 def blog_response(response):
     try:
         return response.json()
     except ValueError:
         return response.text
-
-
 blogs_reference_payload = blog_ref()
-
 
 @app.get('/blogsupload')
 def blogsupload():
     return render_template('blogsupload.html', res=session.get('image_credentials'), reference_payload=blog_ref())
-
 
 @app.post('/generate-blog')
 def generate_blog():
@@ -1005,7 +845,6 @@ REFERENCE SEO:
     except Exception as exc:
         return jsonify(success=False, error=str(exc)), 500
 
-
 @app.post('/publish-blog')
 def publish_blog():
     data = request.get_json(silent=True) or {}
@@ -1036,10 +875,10 @@ def publish_blog():
         return jsonify(success=False, error=str(exc)), 400
     except Exception as exc:
         return jsonify(success=False, error=str(exc)), 502
-
-
 # =======================
 
+# FAQ generation and publishing
+# ------------------------------------------------------------------------
 FAQ_CATEGORIES = (
     'Digital Marketing', 'Artificial Intelligence & Data',
     'Full-Stack Development', 'Cyber Security & Cloud',
@@ -1047,7 +886,6 @@ FAQ_CATEGORIES = (
 )
 FAQ_API_URL = 'https://cms.techcaddmohali.com/api/faqs'
 FAQ_MAX_COUNT = 50
-
 
 def faq_validate_items(items):
     if not isinstance(items, list) or not 1 <= len(items) <= FAQ_MAX_COUNT:
@@ -1068,11 +906,9 @@ def faq_validate_items(items):
         clean.append({'question': q, 'answer': a})
     return clean
 
-
 @app.get('/faqsupload')
 def faqsupload():
     return render_template('faqsupload.html', categories=FAQ_CATEGORIES, max_count=FAQ_MAX_COUNT)
-
 
 @app.post('/generate-faqs')
 def generate_faqs():
@@ -1091,7 +927,7 @@ Topic: {topic.strip()}
 Category: {category}
 Generate exactly {count} distinct student-focused FAQs. Use natural English and direct, helpful answers (approximately 40–80 words each where appropriate). Cover relevant student search intent, technical concepts, practical projects, eligibility, learning paths and career considerations. Use Mohali and nearby areas only where relevant. Always spell techcadd in lowercase. Do not invent fees, batch dates, certificates, placements, rankings or guarantees. Refer students to techcadd for unconfirmed details. No HTML or Markdown. Return only a JSON object with this shape: {{"items":[{{"question":"...","answer":"..."}}]}}.'''
     feedback = ''
-    for attempt in range(3):
+    for attempt in range(MAX_ATTEMPTS):
         try:
             raw = make_llm(True).invoke(prompt + feedback).content
             parsed = json.loads(raw)
@@ -1104,7 +940,6 @@ Generate exactly {count} distinct student-focused FAQs. Use natural English and 
             feedback = '\nPrevious output was invalid. Return the complete corrected JSON with exactly the requested count and distinct questions.'
             app.logger.warning('FAQ generation attempt %s failed: %s', attempt+1, type(exc).__name__)
     return jsonify(success=False, error='FAQ generation failed after three attempts. Check the model configuration and server logs.'), 502
-
 
 @app.post('/publish-faq')
 def publish_faq():
@@ -1120,19 +955,7 @@ def publish_faq():
         payload = dict(item, categoryName=category, order=order, featured=False, status='published')
     except ValueError as exc:
         return jsonify(success=False, error=str(exc)), 400
-    
-    headers = {
-        'accept': '*/*',
-        'accept-language': 'en-US,en;q=0.9',
-        'content-type': 'application/json',
-        'origin': 'https://cms.techcaddmohali.com',
-        'priority': 'u=1, i',
-        'referer': 'https://cms.techcaddmohali.com/faqs/new',
-        'sec-ch-ua': '"Chromium";v="158", "Not.A/Brand";v="24", "Google Chrome";v="158"',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36',
-        'Cookie': '_ga=GA1.1.1993469050.1795078505; techcadd_session=s%3A0790112d-e09c-41cd-a6e8-df5819420bf4.RnbrMyp%2B6bp2bQkO76qamhkcAkUmhuDuI508%2FJ%2Behzo; _clck=1pfe81f%5E2%5Egbg%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795595839$o12$g1$t1795595901$j60$l0$h0; _clsk=2qdlyt%5E1795595903440%5E2%5E1%5Ef.clarity.ms%2Fcollect'
-        }
-    
+    headers = cms_headers('/faqs/new', json_request=True, full_browser=False)
     try:
         response = requests.post(FAQ_API_URL, headers=headers, json=payload, timeout=60, allow_redirects=False)
         try:
@@ -1144,12 +967,7 @@ def publish_faq():
     except requests.RequestException:
         return jsonify(success=False, uncertain=True, error='CMS connection failed. Verify whether the FAQ was created before retrying.'), 502
 
-# if __name__ == "__main__":
-#     app.run(debug=False, port=5000, threaded=True)
-
+# Application entry point
+# ------------------------------------------------------------------------
 if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",
-        port=8000,
-        debug=False
-    )
+    app.run(debug=False, port=5000, threaded=True)
