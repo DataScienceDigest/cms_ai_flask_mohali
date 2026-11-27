@@ -35,7 +35,7 @@ def cms_headers(referer, *, json_request=True, full_browser=False):
             'sec-ch-ua': '"Chromium";v="158", "Not.A/Brand";v="24", "Google Chrome";v="158"',
          
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/158.0.0.0 Safari/537.36',
-            'Cookie': '_ga=GA1.1.1993469050.1795078505; techcadd_session=s%3A0790112d-e09c-41cd-a6e8-df5819420bf4.RnbrMyp%2B6bp2bQkO76qamhkcAkUmhuDuI508%2FJ%2Behzo; _clck=1pfe81f%5E2%5Egbg%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795579102$o9$g1$t1795582201$j43$l0$h0; _clsk=13g2kvz%5E1795582203454%5E9%5E1%5Es.clarity.ms%2Fcollect',
+            'Cookie': '_ga=GA1.1.1993469050.1795078505; _clck=1pfe81f%5E2%5Egbg%5E0%5E2514; _ga_9Z3DEFNXKL=GS2.1.s1795595839$o12$g1$t1795595901$j60$l0$h0; techcadd_session=s%3Af17c638e-c543-476b-a034-31d7196f0171.7aoZMLQlidp2A1g%2F3I5Z4V16NrUzs6QJE%2BDZoL5SdeE',
             }
     
     return headers
