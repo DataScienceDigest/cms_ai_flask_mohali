@@ -52,7 +52,7 @@ def make_llm(json_mode: bool):
     return ChatOpenAI(
         api_key=os.getenv("OPENAI_API_KEY"),
         model=os.getenv("OPENAI_MODEL"),
-        timeout=180,
+        timeout=500,
         max_retries=2,
         model_kwargs=kwargs,
     )
